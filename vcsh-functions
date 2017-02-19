@@ -539,12 +539,7 @@ parse_status_args() {
 	enter_repo "$2"
 }
 
-parse_implicitrun_args() {
-	enter_repo "$1"
-	[ -d "$GIT_DIR" ] || { help; exit 1; }
-}
-
-parse_implicitenter_args() {
+parse_implicit_args() {
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
