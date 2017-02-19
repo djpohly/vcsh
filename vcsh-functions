@@ -442,7 +442,7 @@ write_gitignore() {
 		fatal "could not move '$tempfile' to '$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME'" 53
 }
 
-get_full_command() {
+expand_abbrev_cmd() {
 	case $1 in
 		clon|clo|cl) echo clone;;
 		commi|comm|com|co) echo commit;;
