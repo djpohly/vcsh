@@ -79,10 +79,6 @@ fi
 
 debug $(git version)
 
-if [ ! "x$VCSH_GITIGNORE" = 'xexact' ] && [ ! "x$VCSH_GITIGNORE" = 'xnone' ] && [ ! "x$VCSH_GITIGNORE" = 'xrecursive' ]; then
-	fatal "'\$VCSH_GITIGNORE' must equal 'exact', 'none', or 'recursive'" 1
-fi
-
 VCSH_COMMAND=$(get_full_command "$1"); export VCSH_COMMAND
 
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
