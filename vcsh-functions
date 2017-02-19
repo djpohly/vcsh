@@ -381,10 +381,10 @@ use() {
 
 which() {
 	output=$(for VCSH_REPO_NAME in $(list); do
-		get_files | grep -- "$VCSH_COMMAND_PARAMETER" | sed "s/^/$VCSH_REPO_NAME: /"
+		get_files | grep -- "$1" | sed "s/^/$VCSH_REPO_NAME: /"
 	done | sort -u)
 	if [ -z "$output" ]; then
-		fatal "'$VCSH_COMMAND_PARAMETER' does not exist" 1
+		fatal "'$1' does not exist" 1
 	else
 		echo "$output"
 	fi
@@ -509,7 +509,6 @@ parse_clone_args() {
 parse_which_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
 	[ -n "$3" ] && fatal "$VCSH_COMMAND: too many parameters" 1
-	VCSH_COMMAND_PARAMETER=$2; export VCSH_COMMAND_PARAMETER
 }
 
 parse_repo_args() {

@@ -89,6 +89,7 @@ elif [ "$VCSH_COMMAND" = 'version' ]; then
 	exit
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
 	parse_which_args "$@"
+	shift 1
 elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'enter' ]            ||
      [ x"$VCSH_COMMAND" = x'init' ]             ||
