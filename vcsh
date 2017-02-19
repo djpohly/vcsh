@@ -114,10 +114,12 @@ elif [ x"$VCSH_COMMAND" = x'commit' ] ||
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	parse_status_args "$@"
 elif [ -n "$2" ]; then
+	VCSH_COMMAND='run'; export VCSH_COMMAND
 	parse_implicitrun_args "$@"
 	shift 1
 	set -- "git" "$@"
 elif [ -n "$VCSH_COMMAND" ]; then
+	VCSH_COMMAND='enter'; export VCSH_COMMAND
 	parse_implicitenter_args "$@"
 else
 	# $1 is empty, or 'help'

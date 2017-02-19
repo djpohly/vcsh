@@ -540,13 +540,11 @@ parse_status_args() {
 }
 
 parse_implicitrun_args() {
-	VCSH_COMMAND='run'; export VCSH_COMMAND
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
 
 parse_implicitenter_args() {
-	VCSH_COMMAND='enter'; export VCSH_COMMAND
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
