@@ -1,3 +1,5 @@
+#!/bin/sh
+
 fatal() {
 	echo "$SELF: fatal: $1" >&2
 	[ -z $2 ] && exit 1
@@ -438,4 +440,25 @@ write_gitignore() {
 	fi
 	mv -f "$tempfile" "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME" ||
 		fatal "could not move '$tempfile' to '$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME'" 53
+}
+
+get_full_command() {
+	case $1 in
+		clon|clo|cl) echo clone;;
+		commi|comm|com|co) echo commit;;
+		delet|dele|del|de) echo delete;;
+		ente|ent|en) echo enter;;
+		hel|he) echo help;;
+		ini|in) echo init;;
+		pul) echo pull;;
+		pus) echo push;;
+		renam|rena|ren|re) echo rename;;
+		ru) echo run;;
+		statu|stat|sta|st) echo status;;
+		upgrad|upgra|upgr|up) echo upgrade;;
+		versio|versi|vers|ver|ve) echo version;;
+		which|whi|wh) echo which;;
+		write|writ|wri|wr) echo write-gitignore;;
+		*) echo "$1";;
+	esac
 }

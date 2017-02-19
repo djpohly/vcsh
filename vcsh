@@ -83,25 +83,7 @@ if [ ! "x$VCSH_GITIGNORE" = 'xexact' ] && [ ! "x$VCSH_GITIGNORE" = 'xnone' ] && 
 	fatal "'\$VCSH_GITIGNORE' must equal 'exact', 'none', or 'recursive'" 1
 fi
 
-VCSH_COMMAND=$1; export VCSH_COMMAND
-
-case $VCSH_COMMAND in
-	clon|clo|cl) VCSH_COMMAND=clone;;
-	commi|comm|com|co) VCSH_COMMAND=commit;;
-	delet|dele|del|de) VCSH_COMMAND=delete;;
-	ente|ent|en) VCSH_COMMAND=enter;;
-	hel|he) VCSH_COMMAND=help;;
-	ini|in) VCSH_COMMAND=init;;
-	pul) VCSH_COMMAND=pull;;
-	pus) VCSH_COMMAND=push;;
-	renam|rena|ren|re) VCSH_COMMAND=rename;;
-	ru) VCSH_COMMAND=run;;
-	statu|stat|sta|st) VCSH_COMMAND=status;;
-	upgrad|upgra|upgr|up) VCSH_COMMAND=upgrade;;
-	versio|versi|vers|ver|ve) VCSH_COMMAND=version;;
-	which|whi|wh) VCSH_COMMAND=which;;
-	write|writ|wri|wr) VCSH_COMMAND=write-gitignore;;
-esac    
+VCSH_COMMAND=$(get_full_command "$1"); export VCSH_COMMAND
 
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
 	VCSH_BRANCH=
