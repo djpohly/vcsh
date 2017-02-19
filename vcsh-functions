@@ -475,7 +475,13 @@ check_dir() {
 	fi
 }
 
+enter_repo() {
+	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
+	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+}
+
 parse_clone_args() {
+	local repo
 	VCSH_BRANCH=
 	if [ "$2" = -b ]; then
 		VCSH_BRANCH=$3
@@ -490,15 +496,14 @@ parse_clone_args() {
 		shift
 	fi
 	if [ -n "$3" ]; then
-		VCSH_REPO_NAME=$3
+		repo=$3
 		[ -z "$VCSH_BRANCH" ] && [ "$4" = -b ] && VCSH_BRANCH=$5
 	else
-		VCSH_REPO_NAME=$(basename "${GIT_REMOTE#*:}" .git)
+		repo=$(basename "${GIT_REMOTE#*:}" .git)
 	fi
-	[ -z "$VCSH_REPO_NAME" ] && fatal "$VCSH_COMMAND: could not determine repository name" 1
-	export VCSH_REPO_NAME
+	[ -z "$repo" ] && fatal "$VCSH_COMMAND: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+	enter_repo "$repo"
 }
 
 parse_which_args() {
@@ -509,15 +514,13 @@ parse_which_args() {
 
 parse_repo_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+	enter_repo "$2"
 }
 
 parse_rename_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
-	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+	enter_repo "$2"
 	VCSH_REPO_NAME_NEW=$3; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 }
@@ -525,8 +528,7 @@ parse_rename_args() {
 parse_run_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a command" 1
-	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+	enter_repo "$2"
 }
 
 parse_status_args() {
@@ -539,14 +541,12 @@ parse_status_args() {
 
 parse_implicitrun_args() {
 	VCSH_COMMAND='run'; export VCSH_COMMAND
-	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
 
 parse_implicitenter_args() {
 	VCSH_COMMAND='enter'; export VCSH_COMMAND
-	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
+	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
