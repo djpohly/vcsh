@@ -536,7 +536,7 @@ parse_status_args() {
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
 	fi
-	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
+	enter_repo "$2"
 }
 
 parse_implicitrun_args() {
