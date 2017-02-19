@@ -475,7 +475,7 @@ check_dir() {
 	fi
 }
 
-setup_clone() {
+parse_clone_args() {
 	VCSH_BRANCH=
 	if [ "$2" = -b ]; then
 		VCSH_BRANCH=$3
@@ -501,19 +501,19 @@ setup_clone() {
 	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 }
 
-setup_which() {
+parse_which_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
 	[ -n "$3" ] && fatal "$VCSH_COMMAND: too many parameters" 1
 	VCSH_COMMAND_PARAMETER=$2; export VCSH_COMMAND_PARAMETER
 }
 
-setup_repocmd() {
+parse_repo_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
 	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 }
 
-setup_rename() {
+parse_rename_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
 	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
@@ -522,14 +522,14 @@ setup_rename() {
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 }
 
-setup_run() {
+parse_run_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a command" 1
 	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
 	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 }
 
-setup_status() {
+parse_status_args() {
 	if [ x"$2" = x'--terse' ]; then
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
@@ -537,14 +537,14 @@ setup_status() {
 	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
 }
 
-setup_run_implicit() {
+parse_implicitrun_args() {
 	VCSH_COMMAND='run'; export VCSH_COMMAND
 	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
 
-setup_enter_implicit() {
+parse_implicitenter_args() {
 	VCSH_COMMAND='enter'; export VCSH_COMMAND
 	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR

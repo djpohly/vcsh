@@ -82,24 +82,24 @@ debug $(git version)
 VCSH_COMMAND=$(get_full_command "$1"); export VCSH_COMMAND
 
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
-	setup_clone "$@"
+	parse_clone_args "$@"
 elif [ "$VCSH_COMMAND" = 'version' ]; then
 	echo "$SELF $VERSION"
 	git version
 	exit
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
-	setup_which "$@"
+	parse_which_args "$@"
 elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'enter' ]            ||
      [ x"$VCSH_COMMAND" = x'init' ]             ||
      [ x"$VCSH_COMMAND" = x'list-tracked-by' ]  ||
      [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
      [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
-	setup_repocmd "$@"
+	parse_repo_args "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
-	setup_rename "$@"
+	parse_rename_args "$@"
 elif [ x"$VCSH_COMMAND" = x'run' ]; then
-	setup_run "$@"
+	parse_run_args "$@"
 	shift 2
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a command" 1
@@ -112,13 +112,13 @@ elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'push'   ]; then
 	:
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
-	setup_status "$@"
+	parse_status_args "$@"
 elif [ -n "$2" ]; then
-	setup_run_implicit "$@"
+	parse_implicitrun_args "$@"
 	shift 1
 	set -- "git" "$@"
 elif [ -n "$VCSH_COMMAND" ]; then
-	setup_enter_implicit "$@"
+	parse_implicitenter_args "$@"
 else
 	# $1 is empty, or 'help'
 	help && exit
