@@ -544,6 +544,41 @@ parse_implicit_args() {
 }
 
 source_configs() {
+	# Read configuration files if there are any
+	[ -r "/etc/vcsh/config" ]             && . "/etc/vcsh/config"
+	[ -r "$XDG_CONFIG_HOME/vcsh/config" ] && . "$XDG_CONFIG_HOME/vcsh/config"
+	if [ -n "$VCSH_OPTION_CONFIG" ]; then
+		# Source $VCSH_OPTION_CONFIG if it can be read and is in $PWD of $PATH
+		if [ -r "$VCSH_OPTION_CONFIG" ]; then
+			source_all "$VCSH_OPTION_CONFIG"
+		else
+			fatal "Can not read configuration file '$VCSH_OPTION_CONFIG'" 1
+		fi
+	fi
+}
+
+set_defaults() {
+	# Read defaults
+	: ${VCSH_REPO_D:="$XDG_CONFIG_HOME/vcsh/repo.d"}
+	: ${VCSH_HOOK_D:="$XDG_CONFIG_HOME/vcsh/hooks-enabled"}
+	: ${VCSH_OVERLAY_D:="$XDG_CONFIG_HOME/vcsh/overlays-enabled"}
+	: ${VCSH_BASE:="$HOME"}
+	: ${VCSH_GITIGNORE:=exact}
+	: ${VCSH_GITATTRIBUTES:=none}
+	: ${VCSH_WORKTREE:=absolute}
+}
+
+check_options() {
+	if [ ! "x$VCSH_GITIGNORE" = 'xexact' ] && [ ! "x$VCSH_GITIGNORE" = 'xnone' ] && [ ! "x$VCSH_GITIGNORE" = 'xrecursive' ]; then
+		fatal "'\$VCSH_GITIGNORE' must equal 'exact', 'none', or 'recursive'" 1
+	fi
+
+	if [ ! "x$VCSH_WORKTREE" = 'xabsolute' ] && [ ! "x$VCSH_WORKTREE" = 'xrelative' ]; then
+		fatal "'\$VCSH_WORKTREE' must equal 'absolute', or 'relative'" 1
+	fi
+}
+
+source_extra_configs() {
 	# Source repo-specific configuration file
 	[ -r "$XDG_CONFIG_HOME/vcsh/config.d/$1" ] && . "$XDG_CONFIG_HOME/vcsh/config.d/$1"
 
