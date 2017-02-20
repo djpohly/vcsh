@@ -109,9 +109,7 @@ if echo "$VCSH_REPO_NAME" | grep -q '/'; then
 	VCSH_REPO_NAME=$(basename "$VCSH_REPO_NAME" .git); export VCSH_REPO_NAME
 fi
 
-check_dir "$VCSH_REPO_D"
-[ ! "x$VCSH_GITIGNORE" = 'xnone' ] && check_dir "$VCSH_BASE/.gitignore.d"
-[ ! "x$VCSH_GITATTRIBUTES" = 'xnone' ] && check_dir "$VCSH_BASE/.gitattributes.d"
+check_needed_dirs
 
 verbose "$VCSH_COMMAND begin"
 VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
