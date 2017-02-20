@@ -105,8 +105,7 @@ fi
 # Did we receive a directory instead of a name?
 # Mangle the input to fit normal operation.
 if echo "$VCSH_REPO_NAME" | grep -q '/'; then
-	GIT_DIR=$VCSH_REPO_NAME; export GIT_DIR
-	VCSH_REPO_NAME=$(basename "$VCSH_REPO_NAME" .git); export VCSH_REPO_NAME
+	enter_repo "$(basename "$VCSH_REPO_NAME" .git)" "$VCSH_REPO_NAME"
 fi
 
 check_needed_dirs
