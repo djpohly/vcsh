@@ -542,3 +542,15 @@ parse_implicit_args() {
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
 }
+
+source_configs() {
+	# Source repo-specific configuration file
+	[ -r "$XDG_CONFIG_HOME/vcsh/config.d/$1" ] && . "$XDG_CONFIG_HOME/vcsh/config.d/$1"
+
+	# source overlay functions
+	for overlay in "$VCSH_OVERLAY_D/$2"* "$VCSH_OVERLAY_D/$1.$2"*; do
+		[ -r "$overlay" ] || continue
+		info "sourcing '$overlay'"
+		. "$overlay"
+	done
+}
