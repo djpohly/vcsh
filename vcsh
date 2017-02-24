@@ -55,12 +55,19 @@ debug $(git version)
 
 VCSH_COMMAND=$(expand_abbrev_cmd "$1"); export VCSH_COMMAND
 
-if [ x"$VCSH_COMMAND" = x'clone' ]; then
-	parse_clone_args "$@"
-elif [ "$VCSH_COMMAND" = 'version' ]; then
+# First handle commands which exit immediately
+if [ x"$VCSH_COMMAND" = x'version' ]; then
 	echo "$SELF $VERSION"
 	git version
 	exit
+fi
+if [ -z "$VCSH_COMMAND" ] || [ x"$VCSH_COMMAND" = x'help' ]; then
+	# $1 is empty, or 'help'
+	help && exit
+fi
+
+if [ x"$VCSH_COMMAND" = x'clone' ]; then
+	parse_clone_args "$@"
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
 	parse_which_args "$@"
 	shift 1
@@ -93,12 +100,9 @@ elif [ -n "$2" ]; then
 	parse_implicit_args "$@"
 	shift 1
 	set -- "git" "$@"
-elif [ -n "$VCSH_COMMAND" ]; then
+else
 	VCSH_COMMAND='enter'; export VCSH_COMMAND
 	parse_implicit_args "$@"
-else
-	# $1 is empty, or 'help'
-	help && exit
 fi
 
 # Did we receive a directory instead of a name?
