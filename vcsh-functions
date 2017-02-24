@@ -599,3 +599,15 @@ source_extra_configs() {
 		. "$overlay"
 	done
 }
+
+run_vcsh_cmd() {
+	VCSH_COMMAND=$1
+	shift
+	source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	verbose "$VCSH_COMMAND begin"
+	hook pre-command
+	"$VCSH_COMMAND" "$@"
+	hook post-command
+	verbose "$VCSH_COMMAND end, exiting"
+	return $VCSH_COMMAND_RETURN_CODE
+}

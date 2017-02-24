@@ -113,13 +113,6 @@ fi
 
 check_needed_dirs
 
-verbose "$VCSH_COMMAND begin"
 VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
 
-source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-
-hook pre-command
-$VCSH_COMMAND "$@"
-hook post-command
-verbose "$VCSH_COMMAND end, exiting"
-exit $VCSH_COMMAND_RETURN_CODE
+run_vcsh_cmd "$VCSH_COMMAND" "$@"
