@@ -107,7 +107,6 @@ elif [ x"$VCSH_COMMAND" = x'commit' ] ||
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
-	mangle_repo_name
 	check_needed_dirs
 	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
