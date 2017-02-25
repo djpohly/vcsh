@@ -208,7 +208,7 @@ get_files() {
 }
 
 list_tracked() {
-	VCSH_REPO_NAME=$2; export VCSH_REPO_NAME
+	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 	if [ -n "$VCSH_REPO_NAME" ]; then
 		get_files | list_tracked_helper
 	else
@@ -224,7 +224,7 @@ list_tracked_helper() {
 }
 
 list_tracked_by() {
-	list_tracked '' $2
+	list_tracked $2
 	return 0
 }
 
@@ -238,7 +238,6 @@ list_untracked() {
 	# Hack in support for `vcsh list-untracked -r`...
 	exclude_standard_opt='--exclude-standard'
 	directory_opt="--directory"
-	shift 1
 	while getopts "ar" flag; do
 		if [ x"$1" = x'-a' ]; then
 			unset exclude_standard_opt

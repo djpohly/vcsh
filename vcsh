@@ -122,6 +122,7 @@ elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'push'   ] ||
      [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
+	shift 1
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	shift 1
