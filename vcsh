@@ -53,7 +53,7 @@ validate_env_options
 
 debug $(git version)
 
-VCSH_COMMAND=$(expand_abbrev_cmd "$1"); export VCSH_COMMAND
+VCSH_COMMAND=$(expand_abbrev_cmd "$1")
 
 # First handle commands which exit immediately
 if [ x"$VCSH_COMMAND" = x'version' ]; then
