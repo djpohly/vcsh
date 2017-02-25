@@ -66,14 +66,14 @@ if [ -z "$VCSH_COMMAND" ] || [ x"$VCSH_COMMAND" = x'help' ]; then
 	help && exit
 fi
 
+check_needed_dirs
+
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
 	parse_clone_args "$@"
-	check_needed_dirs
 	run_vcsh_cmd clone "$@"
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
 	parse_which_args "$@"
 	shift 1
-	check_needed_dirs
 	run_vcsh_cmd which "$@"
 elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'enter' ]            ||
@@ -82,45 +82,36 @@ elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
      [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
 	parse_repo_args "$@"
-	check_needed_dirs
 	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
 	parse_rename_args "$@"
-	check_needed_dirs
 	run_vcsh_cmd rename "$@"
 elif [ x"$VCSH_COMMAND" = x'run' ]; then
 	parse_run_args "$@"
 	shift 2
-	check_needed_dirs
 	run_vcsh_cmd run "$@"
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
 	[ -z "$2" ] && fatal "foreach: please specify a command" 1
 	shift 1
-	check_needed_dirs
 	run_vcsh_cmd foreach "$@"
 elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'list'   ] ||
      [ x"$VCSH_COMMAND" = x'pull'   ] ||
      [ x"$VCSH_COMMAND" = x'push'   ]; then
-	check_needed_dirs
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
-	check_needed_dirs
 	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	parse_status_args "$@"
-	check_needed_dirs
 	run_vcsh_cmd status "$@"
 elif [ -n "$2" ]; then
 	parse_implicit_args "$@"
 	shift 1
-	check_needed_dirs
 	run_vcsh_cmd run git "$@"
 else
 	parse_implicit_args "$@"
-	check_needed_dirs
 	run_vcsh_cmd enter "$@"
 fi
