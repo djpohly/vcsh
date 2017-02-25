@@ -116,11 +116,12 @@ elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	fi
 	enter_repo "$2"
 	run_vcsh_cmd status "$@"
-elif [ -n "$2" ]; then
-	parse_implicit_args "$@"
-	shift 1
-	run_vcsh_cmd run git "$@"
 else
 	parse_implicit_args "$@"
-	run_vcsh_cmd enter "$@"
+	if [ -n "$2" ]; then
+		shift 1
+		run_vcsh_cmd run git "$@"
+	else
+		run_vcsh_cmd enter "$@"
+	fi
 fi
