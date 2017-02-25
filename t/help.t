@@ -3,7 +3,6 @@
 load environment
 
 @test "Help command succeeds" {
-	skip "BUG: help command fails"
 	$VCSH help
 }
 @test "Help command writes to stderr and not stdout" {
@@ -18,7 +17,6 @@ load environment
 }
 
 @test "Help command can be abbreviated (hel, he)" {
-	skip "BUG: help command fails"
 	run $VCSH help
 	local good=$output
 
