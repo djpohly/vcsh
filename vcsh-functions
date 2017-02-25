@@ -467,7 +467,7 @@ expand_abbrev_cmd() {
 		commi|comm|com|co) echo commit;;
 		delet|dele|del|de) echo delete;;
 		ente|ent|en) echo enter;;
-		hel|he) echo help;;
+		hel|he|'') echo help;;
 		ini|in) echo init;;
 		pul) echo pull;;
 		pus) echo push;;

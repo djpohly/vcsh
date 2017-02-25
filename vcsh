@@ -61,7 +61,7 @@ if [ x"$VCSH_COMMAND" = x'version' ]; then
 	git version
 	exit
 fi
-if [ -z "$VCSH_COMMAND" ] || [ x"$VCSH_COMMAND" = x'help' ]; then
+if [ x"$VCSH_COMMAND" = x'help' ]; then
 	# $1 is empty, or 'help'
 	help && exit
 fi
