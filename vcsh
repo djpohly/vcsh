@@ -99,10 +99,12 @@ elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
 	enter_repo "$2"
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
-	enter_repo "$2"
-	VCSH_REPO_NAME_NEW=$3; export VCSH_REPO_NAME_NEW;
+	shift 1
+	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
+	enter_repo "$1"
+	shift 1
+	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
+	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	run_vcsh_cmd rename "$@"
 elif [ x"$VCSH_COMMAND" = x'run' ]; then
