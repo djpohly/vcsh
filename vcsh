@@ -74,7 +74,6 @@ if [ x"$VCSH_COMMAND" = x'clone' ]; then
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
 	parse_which_args "$@"
 	shift 1
-	mangle_repo_name
 	check_needed_dirs
 	run_vcsh_cmd which "$@"
 elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
@@ -102,15 +101,16 @@ elif [ x"$VCSH_COMMAND" = x'run' ]; then
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
 	[ -z "$2" ] && fatal "foreach: please specify a command" 1
 	shift 1
-	mangle_repo_name
 	check_needed_dirs
 	run_vcsh_cmd foreach "$@"
 elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'list'   ] ||
-     [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
-     [ x"$VCSH_COMMAND" = x'list-untracked' ] ||
      [ x"$VCSH_COMMAND" = x'pull'   ] ||
      [ x"$VCSH_COMMAND" = x'push'   ]; then
+	check_needed_dirs
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
+elif [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
+     [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
 	mangle_repo_name
 	check_needed_dirs
 	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
