@@ -541,38 +541,6 @@ parse_clone_args() {
 	enter_repo "$repo"
 }
 
-parse_which_args() {
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
-	[ -n "$3" ] && fatal "$VCSH_COMMAND: too many parameters" 1
-}
-
-parse_repo_args() {
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	enter_repo "$2"
-}
-
-parse_rename_args() {
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
-	enter_repo "$2"
-	VCSH_REPO_NAME_NEW=$3; export VCSH_REPO_NAME_NEW;
-	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
-}
-
-parse_run_args() {
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a command" 1
-	enter_repo "$2"
-}
-
-parse_status_args() {
-	if [ x"$2" = x'--terse' ]; then
-		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
-		shift
-	fi
-	enter_repo "$2"
-}
-
 parse_implicit_args() {
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
