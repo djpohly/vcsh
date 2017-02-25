@@ -68,6 +68,9 @@ if [ -z "$VCSH_COMMAND" ]; then
 	fi
 fi
 
+# Command now stored in $VCSH_COMMAND
+shift 1
+
 # First handle commands which exit immediately
 if [ x"$VCSH_COMMAND" = x'version' ]; then
 	echo "$SELF $VERSION"
@@ -82,11 +85,9 @@ fi
 check_needed_dirs
 
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
-	shift 1
 	parse_clone_args "$@"
 	run_vcsh_cmd clone "$@"
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
-	shift 1
 	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
 	[ -n "$2" ] && fatal "$VCSH_COMMAND: too many parameters" 1
 	run_vcsh_cmd which "$@"
@@ -96,12 +97,10 @@ elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'list-tracked-by' ]  ||
      [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
      [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
-	shift 1
 	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	enter_repo "$1"
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
-	shift 1
 	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	enter_repo "$1"
 	shift 1
@@ -110,14 +109,12 @@ elif [ x"$VCSH_COMMAND" = x'rename' ]; then
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	run_vcsh_cmd rename "$@"
 elif [ x"$VCSH_COMMAND" = x'run' ]; then
-	shift 1
 	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	enter_repo "$1"
 	shift 1
 	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a command" 1
 	run_vcsh_cmd run "$@"
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
-	shift 1
 	[ -z "$1" ] && fatal "foreach: please specify a command" 1
 	run_vcsh_cmd foreach "$@"
 elif [ x"$VCSH_COMMAND" = x'commit' ] ||
@@ -126,10 +123,8 @@ elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'push'   ] ||
      [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
-	shift 1
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
-	shift 1
 	if [ x"$1" = x'--terse' ]; then
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
