@@ -541,11 +541,6 @@ parse_clone_args() {
 	enter_repo "$repo"
 }
 
-parse_implicit_args() {
-	enter_repo "$1"
-	[ -d "$GIT_DIR" ] || { help; exit 1; }
-}
-
 source_configs() {
 	# Read configuration files if there are any
 	[ -r "/etc/vcsh/config" ]             && . "/etc/vcsh/config"
