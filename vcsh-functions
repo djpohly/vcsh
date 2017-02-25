@@ -533,6 +533,7 @@ parse_clone_args() {
 	[ -z "$repo" ] && fatal "$VCSH_COMMAND: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
 	enter_repo "$repo"
+	mangle_repo_name
 }
 
 parse_which_args() {
@@ -543,6 +544,7 @@ parse_which_args() {
 parse_repo_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	enter_repo "$2"
+	mangle_repo_name
 }
 
 parse_rename_args() {
@@ -551,12 +553,14 @@ parse_rename_args() {
 	enter_repo "$2"
 	VCSH_REPO_NAME_NEW=$3; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
+	mangle_repo_name
 }
 
 parse_run_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a command" 1
 	enter_repo "$2"
+	mangle_repo_name
 }
 
 parse_status_args() {
@@ -565,11 +569,13 @@ parse_status_args() {
 		shift
 	fi
 	enter_repo "$2"
+	mangle_repo_name
 }
 
 parse_implicit_args() {
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
+	mangle_repo_name
 }
 
 source_configs() {
