@@ -49,7 +49,7 @@ source_configs
 [ -n "$VCSH_DEBUG" ]                  && set -vx
 
 set_defaults
-check_options
+validate_env_options
 
 debug $(git version)
 

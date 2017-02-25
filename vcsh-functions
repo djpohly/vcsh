@@ -578,7 +578,7 @@ set_defaults() {
 	: ${VCSH_WORKTREE:=absolute}
 }
 
-check_options() {
+validate_env_options() {
 	if [ ! "x$VCSH_GITIGNORE" = 'xexact' ] && [ ! "x$VCSH_GITIGNORE" = 'xnone' ] && [ ! "x$VCSH_GITIGNORE" = 'xrecursive' ]; then
 		fatal "'\$VCSH_GITIGNORE' must equal 'exact', 'none', or 'recursive'" 1
 	fi
