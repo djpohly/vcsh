@@ -112,8 +112,8 @@ elif [ x"$VCSH_COMMAND" = x'run' ]; then
 	shift 2
 	run_vcsh_cmd run "$@"
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
-	[ -z "$2" ] && fatal "foreach: please specify a command" 1
 	shift 1
+	[ -z "$1" ] && fatal "foreach: please specify a command" 1
 	run_vcsh_cmd foreach "$@"
 elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'list'   ] ||
