@@ -105,6 +105,7 @@ clone() {
 	hook post-clone
 	retire
 	hook post-clone-retired
+	return 0
 }
 
 commit() {
@@ -114,10 +115,11 @@ commit() {
 		GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 		use
 		git commit --untracked-files=no --quiet $@
-		VCSH_COMMAND_RETURN_CODE=$?
+		ret=$?
 		echo
 	done
 	hook post-commit
+	return $ret
 }
 
 delete() {
@@ -137,6 +139,7 @@ To continue, type 'Yes, do as I say'"
 		rm -f $file || info "could not delete '$file', continuing with deletion"
 	done
 	rm -rf "$GIT_DIR" || error "could not delete '$GIT_DIR'"
+	return 0
 }
 
 enter() {
@@ -144,6 +147,7 @@ enter() {
 	use
 	$SHELL
 	hook post-enter
+	return 0
 }
 
 foreach() {
@@ -165,6 +169,7 @@ foreach() {
 		$command_prefix "$@"
 	done
 	hook post-foreach
+	return 0
 }
 
 git_dir_exists() {
@@ -187,12 +192,14 @@ init() {
 	git init --shared=0600
 	upgrade
 	hook post-init
+	return 0
 }
 
 list() {
 	for repo in "$VCSH_REPO_D"/*.git; do
 		[ -d "$repo" ] && [ -r "$repo" ] && echo "$(basename "$repo" .git)"
 	done
+	return 0
 }
 
 get_files() {
@@ -209,6 +216,7 @@ list_tracked() {
 			get_files
 		done | list_tracked_helper
 	fi
+	return 0
 }
 
 list_tracked_helper() {
@@ -217,6 +225,7 @@ list_tracked_helper() {
 
 list_tracked_by() {
 	list_tracked '' $2
+	return 0
 }
 
 list_untracked() {
@@ -252,6 +261,7 @@ list_untracked() {
 
 	unset directory_opt directory_component
 	rm -f $temp_file_others $temp_file_untracked $temp_file_untracked_copy || fatal 'Could not delete temp files'
+	return 0
 }
 
 list_untracked_helper() {
@@ -278,10 +288,11 @@ pull() {
 		GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 		use
 		git pull
-		VCSH_COMMAND_RETURN_CODE=$?
+		ret=$?
 		echo
 	done
 	hook post-pull
+	return $ret
 }
 
 push() {
@@ -291,10 +302,11 @@ push() {
 		GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 		use
 		git push
-		VCSH_COMMAND_RETURN_CODE=$?
+		ret=$?
 		echo
 	done
 	hook post-push
+	return $ret
 }
 
 retire() {
@@ -312,14 +324,16 @@ rename() {
 	VCSH_REPO_NAME=$VCSH_REPO_NAME_NEW
 	# ..and clobber all old configuration
 	upgrade
+	return 0
 }
 
 run() {
 	hook pre-run
 	use
 	"$@"
-	VCSH_COMMAND_RETURN_CODE=$?
+	ret=$?
 	hook post-run
+	return $ret
 }
 
 status() {
@@ -328,14 +342,17 @@ status() {
 	fi
 	if [ -n "$VCSH_REPO_NAME" ]; then
 		status_helper $VCSH_REPO_NAME
+		ret=$?
 	else
 		for VCSH_REPO_NAME in $(list); do
 			STATUS=$(status_helper $VCSH_REPO_NAME "$COLORING")
+			ret=$?
 			[ -n "$STATUS" -o -z "$VCSH_STATUS_TERSE" ] && echo "$VCSH_REPO_NAME:"
 			[ -n "$STATUS" ]            && echo "$STATUS"
 			[ -z "$VCSH_STATUS_TERSE" ] && echo
 		done
 	fi
+	return $ret
 }
 
 status_helper() {
@@ -349,7 +366,6 @@ status_helper() {
 		[ ${commits_ahead} -ne 0 ] && echo "Ahead of $remote_tracking_branch by $commits_ahead commits"
 	}
 	git ${VCSH_GIT_OPTIONS} status --short --untracked-files='no'
-	VCSH_COMMAND_RETURN_CODE=$?
 }
 
 upgrade() {
@@ -372,6 +388,7 @@ upgrade() {
 	[ -e "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME" ] && git add -f "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME"
 	[ -e "$VCSH_BASE/.gitattributes.d/$VCSH_REPO_NAME" ] && git add -f "$VCSH_BASE/.gitattributes.d/$VCSH_REPO_NAME"
 	hook post-upgrade
+	return 0
 }
 
 use() {
@@ -388,6 +405,7 @@ which() {
 	else
 		echo "$output"
 	fi
+	return 0
 }
 
 write_gitignore() {
@@ -440,6 +458,7 @@ write_gitignore() {
 	fi
 	mv -f "$tempfile" "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME" ||
 		fatal "could not move '$tempfile' to '$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME'" 53
+	return 0
 }
 
 expand_abbrev_cmd() {
@@ -607,6 +626,7 @@ run_vcsh_cmd() {
 	verbose "$VCSH_COMMAND begin"
 	hook pre-command
 	"$VCSH_COMMAND" "$@"
+	VCSH_COMMAND_RETURN_CODE=$?
 	hook post-command
 	verbose "$VCSH_COMMAND end, exiting"
 	return $VCSH_COMMAND_RETURN_CODE
