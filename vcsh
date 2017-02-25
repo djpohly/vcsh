@@ -82,6 +82,7 @@ fi
 check_needed_dirs
 
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
+	shift 1
 	parse_clone_args "$@"
 	run_vcsh_cmd clone "$@"
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
