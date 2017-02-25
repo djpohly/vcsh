@@ -95,8 +95,9 @@ elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'list-tracked-by' ]  ||
      [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
      [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	enter_repo "$2"
+	shift 1
+	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
+	enter_repo "$1"
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
 	shift 1
