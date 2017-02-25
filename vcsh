@@ -123,10 +123,11 @@ elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
-	if [ x"$2" = x'--terse' ]; then
+	shift 1
+	if [ x"$1" = x'--terse' ]; then
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
 	fi
-	enter_repo "$2"
+	enter_repo "$1"
 	run_vcsh_cmd status "$@"
 fi
