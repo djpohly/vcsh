@@ -82,7 +82,6 @@ elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
      [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
 	parse_repo_args "$@"
-	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
 	parse_rename_args "$@"
@@ -98,11 +97,9 @@ elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
 elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'list'   ] ||
      [ x"$VCSH_COMMAND" = x'pull'   ] ||
-     [ x"$VCSH_COMMAND" = x'push'   ]; then
-	run_vcsh_cmd "$VCSH_COMMAND" "$@"
-elif [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
+     [ x"$VCSH_COMMAND" = x'push'   ] ||
+     [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
-	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
 	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	parse_status_args "$@"
