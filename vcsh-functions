@@ -501,6 +501,12 @@ check_needed_dirs() {
 }
 
 enter_repo() {
+	# Did we receive a directory instead of a name?
+	# Mangle the input to fit normal operation.
+	if echo "$1" | grep -q '/'; then
+		set -- "$(basename "$1" .git)" "$1"
+	fi
+
 	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 	if [ -n "$2" ]; then
 		GIT_DIR=$2; export GIT_DIR
@@ -533,7 +539,6 @@ parse_clone_args() {
 	[ -z "$repo" ] && fatal "$VCSH_COMMAND: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
 	enter_repo "$repo"
-	mangle_repo_name
 }
 
 parse_which_args() {
@@ -544,7 +549,6 @@ parse_which_args() {
 parse_repo_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	enter_repo "$2"
-	mangle_repo_name
 }
 
 parse_rename_args() {
@@ -553,14 +557,12 @@ parse_rename_args() {
 	enter_repo "$2"
 	VCSH_REPO_NAME_NEW=$3; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
-	mangle_repo_name
 }
 
 parse_run_args() {
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
 	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a command" 1
 	enter_repo "$2"
-	mangle_repo_name
 }
 
 parse_status_args() {
@@ -569,13 +571,11 @@ parse_status_args() {
 		shift
 	fi
 	enter_repo "$2"
-	mangle_repo_name
 }
 
 parse_implicit_args() {
 	enter_repo "$1"
 	[ -d "$GIT_DIR" ] || { help; exit 1; }
-	mangle_repo_name
 }
 
 source_configs() {
@@ -636,13 +636,4 @@ run_vcsh_cmd() {
 	hook post-command
 	verbose "$VCSH_COMMAND end, exiting"
 	return $VCSH_COMMAND_RETURN_CODE
-}
-
-# Ugly for now, refactor later
-mangle_repo_name() {
-	# Did we receive a directory instead of a name?
-	# Mangle the input to fit normal operation.
-	if echo "$VCSH_REPO_NAME" | grep -q '/'; then
-		enter_repo "$(basename "$VCSH_REPO_NAME" .git)" "$VCSH_REPO_NAME"
-	fi
 }
