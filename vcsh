@@ -85,9 +85,9 @@ if [ x"$VCSH_COMMAND" = x'clone' ]; then
 	parse_clone_args "$@"
 	run_vcsh_cmd clone "$@"
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
-	[ -n "$3" ] && fatal "$VCSH_COMMAND: too many parameters" 1
 	shift 1
+	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
+	[ -n "$2" ] && fatal "$VCSH_COMMAND: too many parameters" 1
 	run_vcsh_cmd which "$@"
 elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'enter' ]            ||
