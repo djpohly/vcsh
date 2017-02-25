@@ -106,10 +106,11 @@ elif [ x"$VCSH_COMMAND" = x'rename' ]; then
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	run_vcsh_cmd rename "$@"
 elif [ x"$VCSH_COMMAND" = x'run' ]; then
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	[ -z "$3" ] && fatal "$VCSH_COMMAND: please specify a command" 1
-	enter_repo "$2"
-	shift 2
+	shift 1
+	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
+	enter_repo "$1"
+	shift 1
+	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a command" 1
 	run_vcsh_cmd run "$@"
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
 	shift 1
