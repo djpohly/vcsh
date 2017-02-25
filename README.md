@@ -61,7 +61,11 @@ known bug, we may be less shy about making it...
 
 ### Fixed
 
-- commands which do not set `VCSH_REPO_NAME` (e.g. which) attempt to source a
-  directory
+The following are bugs which have been incidentally fixed by refactoring so
+far:
+
+- The `help` command returns a failure exit status.
+- Commands which do not set `VCSH_REPO_NAME` (e.g. which) attempt to source a
+  directory.
 - If `$VCSH_COMMAND_RETURN_CODE` is defined prior to running vcsh, it can
   affect the eventual code returned in some cases.
