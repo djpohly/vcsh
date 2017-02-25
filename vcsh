@@ -105,12 +105,7 @@ else
 	parse_implicit_args "$@"
 fi
 
-# Did we receive a directory instead of a name?
-# Mangle the input to fit normal operation.
-if echo "$VCSH_REPO_NAME" | grep -q '/'; then
-	enter_repo "$(basename "$VCSH_REPO_NAME" .git)" "$VCSH_REPO_NAME"
-fi
-
+mangle_repo_name
 check_needed_dirs
 
 VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND

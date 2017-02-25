@@ -611,3 +611,12 @@ run_vcsh_cmd() {
 	verbose "$VCSH_COMMAND end, exiting"
 	return $VCSH_COMMAND_RETURN_CODE
 }
+
+# Ugly for now, refactor later
+mangle_repo_name() {
+	# Did we receive a directory instead of a name?
+	# Mangle the input to fit normal operation.
+	if echo "$VCSH_REPO_NAME" | grep -q '/'; then
+		enter_repo "$(basename "$VCSH_REPO_NAME" .git)" "$VCSH_REPO_NAME"
+	fi
+}
