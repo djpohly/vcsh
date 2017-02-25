@@ -55,6 +55,19 @@ debug $(git version)
 
 VCSH_COMMAND=$(normalize_cmd "$1")
 
+# Unrecognized command = implicit enter or run
+if [ -z "$VCSH_COMMAND" ]; then
+	if [ -z "$2" ]; then
+		VCSH_COMMAND=enter
+		set -- enter "$@"
+	else
+		VCSH_COMMAND=run
+		repo=$1
+		shift 1
+		set -- run "$repo" git "$@"
+	fi
+fi
+
 # First handle commands which exit immediately
 if [ x"$VCSH_COMMAND" = x'version' ]; then
 	echo "$SELF $VERSION"
@@ -116,13 +129,4 @@ elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	fi
 	enter_repo "$2"
 	run_vcsh_cmd status "$@"
-else
-	enter_repo "$1"
-	[ -d "$GIT_DIR" ] || { help; exit 1; }
-	if [ -n "$2" ]; then
-		shift 1
-		run_vcsh_cmd run git "$@"
-	else
-		run_vcsh_cmd enter "$@"
-	fi
 fi
