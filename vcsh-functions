@@ -521,19 +521,19 @@ parse_clone_args() {
 	VCSH_BRANCH=
 	if [ "$1" = -b ]; then
 		VCSH_BRANCH=$2
-		shift
-		shift
+		shift 2
 	fi
 	[ -z "$1" ] && fatal "clone: please specify a remote" 1
 	GIT_REMOTE="$1"
-	[ -n "$VCSH_BRANCH" ] || if [ "$2" = -b ]; then
-		VCSH_BRANCH=$3
-		shift
-		shift
+	shift 1
+	[ -n "$VCSH_BRANCH" ] || if [ "$1" = -b ]; then
+		VCSH_BRANCH=$2
+		shift 2
 	fi
-	if [ -n "$2" ]; then
-		repo=$2
-		[ -z "$VCSH_BRANCH" ] && [ "$3" = -b ] && VCSH_BRANCH=$4
+	if [ -n "$1" ]; then
+		repo=$1
+		shift 1
+		[ -z "$VCSH_BRANCH" ] && [ "$1" = -b ] && VCSH_BRANCH=$2
 	else
 		repo=$(basename "${GIT_REMOTE#*:}" .git)
 	fi
