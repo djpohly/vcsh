@@ -613,12 +613,20 @@ validate_env_options() {
 	fi
 }
 
+source_cmd_configs() {
+	for overlay in "$VCSH_OVERLAY_D/$1"*; do
+		[ -r "$overlay" ] || continue
+		info "sourcing '$overlay'"
+		. "$overlay"
+	done
+}
+
 source_extra_configs() {
 	# Source repo-specific configuration file
 	[ -r "$XDG_CONFIG_HOME/vcsh/config.d/$1" ] && . "$XDG_CONFIG_HOME/vcsh/config.d/$1"
 
 	# source overlay functions
-	for overlay in "$VCSH_OVERLAY_D/$2"* "$VCSH_OVERLAY_D/$1.$2"*; do
+	for overlay in "$VCSH_OVERLAY_D/$1.$2"*; do
 		[ -r "$overlay" ] || continue
 		info "sourcing '$overlay'"
 		. "$overlay"
@@ -628,7 +636,8 @@ source_extra_configs() {
 run_vcsh_cmd() {
 	VCSH_COMMAND=$1; export VCSH_COMMAND
 	shift
-	source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	source_cmd_configs "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"
 	hook pre-command
 	"$VCSH_COMMAND" "$@"
