@@ -523,7 +523,7 @@ parse_clone_args() {
 		shift
 		shift
 	fi
-	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a remote" 1
+	[ -z "$2" ] && fatal "clone: please specify a remote" 1
 	GIT_REMOTE="$2"
 	[ -n "$VCSH_BRANCH" ] || if [ "$3" = -b ]; then
 		VCSH_BRANCH=$4
@@ -536,7 +536,7 @@ parse_clone_args() {
 	else
 		repo=$(basename "${GIT_REMOTE#*:}" .git)
 	fi
-	[ -z "$repo" ] && fatal "$VCSH_COMMAND: could not determine repository name" 1
+	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
 	enter_repo "$repo"
 }
