@@ -620,7 +620,7 @@ source_extra_configs() {
 }
 
 run_vcsh_cmd() {
-	VCSH_COMMAND=$1
+	VCSH_COMMAND=$1; export VCSH_COMMAND
 	shift
 	source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"

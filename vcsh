@@ -121,15 +121,12 @@ elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	check_needed_dirs
 	run_vcsh_cmd status "$@"
 elif [ -n "$2" ]; then
-	VCSH_COMMAND='run'; export VCSH_COMMAND
 	parse_implicit_args "$@"
 	shift 1
-	set -- "git" "$@"
 	mangle_repo_name
 	check_needed_dirs
-	run_vcsh_cmd run "$@"
+	run_vcsh_cmd run git "$@"
 else
-	VCSH_COMMAND='enter'; export VCSH_COMMAND
 	parse_implicit_args "$@"
 	mangle_repo_name
 	check_needed_dirs
