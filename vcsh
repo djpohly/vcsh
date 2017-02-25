@@ -68,9 +68,17 @@ fi
 
 if [ x"$VCSH_COMMAND" = x'clone' ]; then
 	parse_clone_args "$@"
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'which' ]; then
 	parse_which_args "$@"
 	shift 1
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'enter' ]            ||
      [ x"$VCSH_COMMAND" = x'init' ]             ||
@@ -78,36 +86,60 @@ elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
      [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
      [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
 	parse_repo_args "$@"
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'rename' ]; then
 	parse_rename_args "$@"
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'run' ]; then
 	parse_run_args "$@"
 	shift 2
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
 	[ -z "$2" ] && fatal "$VCSH_COMMAND: please specify a command" 1
 	shift 1
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'commit' ] ||
      [ x"$VCSH_COMMAND" = x'list'   ] ||
      [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
      [ x"$VCSH_COMMAND" = x'list-untracked' ] ||
      [ x"$VCSH_COMMAND" = x'pull'   ] ||
      [ x"$VCSH_COMMAND" = x'push'   ]; then
-	:
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ x"$VCSH_COMMAND" = x'status' ]; then
 	parse_status_args "$@"
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 elif [ -n "$2" ]; then
 	VCSH_COMMAND='run'; export VCSH_COMMAND
 	parse_implicit_args "$@"
 	shift 1
 	set -- "git" "$@"
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 else
 	VCSH_COMMAND='enter'; export VCSH_COMMAND
 	parse_implicit_args "$@"
+	mangle_repo_name
+	check_needed_dirs
+	VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+	run_vcsh_cmd "$VCSH_COMMAND" "$@"
 fi
-
-mangle_repo_name
-check_needed_dirs
-
-VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
-
-run_vcsh_cmd "$VCSH_COMMAND" "$@"
