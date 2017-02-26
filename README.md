@@ -1,5 +1,7 @@
 vcsh - Version Control System for $HOME - multiple Git repositories in $HOME
 
+[![Build Status](https://travis-ci.org/djpohly/vcsh.svg?branch=refactor)](https://travis-ci.org/djpohly/vcsh)
+
 # Refactoring branch
 
 The purpose of this branch is to gradually massage the existing vcsh code into
