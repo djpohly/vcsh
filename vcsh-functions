@@ -203,7 +203,8 @@ list() {
 }
 
 get_files() {
-	GIT_DIR=$VCSH_REPO_D/$1.git git ls-files
+	enter_repo "$1"
+	git ls-files
 }
 
 list_tracked() {
@@ -263,8 +264,7 @@ list_untracked() {
 }
 
 list_untracked_helper() {
-	VCSH_REPO_NAME=$1
-	export GIT_DIR="$VCSH_REPO_D/$VCSH_REPO_NAME.git"
+	enter_repo "$1"
 	git ls-files --others $exclude_standard_opt "$directory_opt" | (
 		while read line; do
 			echo "$line"
@@ -355,7 +355,7 @@ status() {
 }
 
 status_helper() {
-	GIT_DIR=$VCSH_REPO_D/$1.git; export GIT_DIR
+	enter_repo "$1"
 	VCSH_GIT_OPTIONS=$2
 	use
 	remote_tracking_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null) && {
