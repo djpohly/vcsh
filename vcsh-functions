@@ -173,7 +173,7 @@ foreach() {
 }
 
 git_dir_exists() {
-	[ -d "$GIT_DIR" ] || fatal "no repository found for '$VCSH_REPO_NAME'" 12
+	[ -d "$1" ] || fatal "no repository found for '$2'" 12
 }
 
 hook() {
@@ -313,7 +313,7 @@ retire() {
 }
 
 rename() {
-	git_dir_exists
+	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
 	mv -f "$GIT_DIR" "$GIT_DIR_NEW" || fatal "Could not mv '$GIT_DIR' '$GIT_DIR_NEW'" 52
 
@@ -391,7 +391,7 @@ upgrade() {
 }
 
 use() {
-	git_dir_exists
+	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	VCSH_DIRECTORY=$VCSH_REPO_NAME; export VCSH_DIRECTORY
 }
 
