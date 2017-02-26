@@ -110,9 +110,9 @@ clone() {
 
 commit() {
 	hook pre-commit
-	for VCSH_REPO_NAME in $(list); do
-		echo "$VCSH_REPO_NAME: "
-		enter_repo "$VCSH_REPO_NAME"
+	for repo in $(list); do
+		echo "$repo: "
+		enter_repo "$repo"
 		use
 		git commit --untracked-files=no --quiet $@
 		ret=$?
@@ -162,9 +162,9 @@ foreach() {
 		fi
 		shift 1
 	done
-	for VCSH_REPO_NAME in $(list); do
-		echo "$VCSH_REPO_NAME:"
-		enter_repo "$VCSH_REPO_NAME"
+	for repo in $(list); do
+		echo "$repo:"
+		enter_repo "$repo"
 		use
 		$command_prefix "$@"
 	done
@@ -207,12 +207,12 @@ get_files() {
 }
 
 list_tracked() {
-	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
-	if [ -n "$VCSH_REPO_NAME" ]; then
-		get_files "$VCSH_REPO_NAME" | list_tracked_helper
+	repo=$1
+	if [ -n "$repo" ]; then
+		get_files "$repo" | list_tracked_helper
 	else
-		for VCSH_REPO_NAME in $(list); do
-			get_files "$VCSH_REPO_NAME"
+		for repo in $(list); do
+			get_files "$repo"
 		done | list_tracked_helper
 	fi
 	return 0
@@ -246,13 +246,13 @@ list_untracked() {
 		shift 1
 	done
 	# ...and parse for a potential parameter afterwards. As we shifted things out of $* in during getops, we need to look at $1
-	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
+	repo=$1
 
-	if [ -n "$VCSH_REPO_NAME" ]; then
-		list_untracked_helper $VCSH_REPO_NAME
+	if [ -n "$repo" ]; then
+		list_untracked_helper $repo
 	else
-		for VCSH_REPO_NAME in $(list); do
-			list_untracked_helper $VCSH_REPO_NAME
+		for repo in $(list); do
+			list_untracked_helper $repo
 		done
 	fi
 	cat $temp_file_untracked
@@ -263,6 +263,7 @@ list_untracked() {
 }
 
 list_untracked_helper() {
+	VCSH_REPO_NAME=$1
 	export GIT_DIR="$VCSH_REPO_D/$VCSH_REPO_NAME.git"
 	git ls-files --others $exclude_standard_opt "$directory_opt" | (
 		while read line; do
@@ -281,9 +282,9 @@ list_untracked_helper() {
 
 pull() {
 	hook pre-pull
-	for VCSH_REPO_NAME in $(list); do
-		printf '%s: ' "$VCSH_REPO_NAME"
-		enter_repo "$VCSH_REPO_NAME"
+	for repo in $(list); do
+		printf '%s: ' "$repo"
+		enter_repo "$repo"
 		use
 		git pull
 		ret=$?
@@ -295,9 +296,9 @@ pull() {
 
 push() {
 	hook pre-push
-	for VCSH_REPO_NAME in $(list); do
-		printf '%s: ' "$VCSH_REPO_NAME"
-		enter_repo "$VCSH_REPO_NAME"
+	for repo in $(list); do
+		printf '%s: ' "$repo"
+		enter_repo "$repo"
 		use
 		git push
 		ret=$?
@@ -395,8 +396,8 @@ use() {
 }
 
 which() {
-	output=$(for VCSH_REPO_NAME in $(list); do
-		get_files "$VCSH_REPO_NAME" | grep -- "$1" | sed "s/^/$VCSH_REPO_NAME: /"
+	output=$(for repo in $(list); do
+		get_files "$repo" | grep -- "$1" | sed "s/^/$repo: /"
 	done | sort -u)
 	if [ -z "$output" ]; then
 		fatal "'$1' does not exist" 1
