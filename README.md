@@ -42,10 +42,11 @@ code cleanup if it were changed, we will post them here for consideration.
 ## Bugs
 
 The following are bugs or oddities that we have noticed while working with the
-vcsh codebase.  This is currently just for the record; fixing these is not our
-focus.  However, if it should happen that a code cleanup step would fix a
-known bug, we may be less shy about making it...
+vcsh codebase.  This is currently just for the record; fixing these is not the
+focus on this branch.  However, if it should happen that a code cleanup step
+would fix a known bug, we may be less shy about making it...
 
+- Commit doesn't like arguments that have spaces
 - `VCSH_GITATTRIBUTES` is not validated like other input variables
 - Several variables, if defined prior to running vcsh, can interfere with its
   operation.  Among these are `$VCSH_CONFLICT`, `$ran_once`, and potentially
@@ -69,3 +70,4 @@ far:
   directory.
 - If `$VCSH_COMMAND_RETURN_CODE` is defined prior to running vcsh, it can
   affect the eventual code returned in some cases.
+- Commit is broken due to missing argument shift

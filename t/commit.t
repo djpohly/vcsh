@@ -9,8 +9,6 @@ load environment
 }
 
 @test "commit works with single repo" {
-	skip "BUG: commit is broken"
-
 	$VCSH init foo
 
 	touch a
@@ -26,8 +24,6 @@ load environment
 }
 
 @test "commit works with multiple repos" {
-	skip "BUG: commit is broken"
-
 	$VCSH init foo
 	$VCSH init bar
 
@@ -44,7 +40,7 @@ load environment
 }
 
 @test "commit can handle arguments with spaces" {
-	skip "BUG: commit is broken"
+	skip "BUG"
 
 	$VCSH init foo
 	$VCSH init bar
@@ -62,7 +58,7 @@ load environment
 }
 
 @test "commit works even if not all repos have changes" {
-	skip "BUG: commit is broken"
+	skip "BUG"
 
 	$VCSH init foo
 	$VCSH init bar
@@ -79,8 +75,6 @@ load environment
 }
 
 @test "commit not affected by existing \$VCSH_COMMAND_RETURN_CODE" {
-	skip "BUG"
-
 	VCSH_COMMAND_RETURN_CODE=1
 	export VCSH_COMMAND_RETURN_CODE
 
