@@ -203,17 +203,16 @@ list() {
 }
 
 get_files() {
-	GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
-	git ls-files
+	GIT_DIR=$VCSH_REPO_D/$1.git git ls-files
 }
 
 list_tracked() {
 	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 	if [ -n "$VCSH_REPO_NAME" ]; then
-		get_files | list_tracked_helper
+		get_files "$VCSH_REPO_NAME" | list_tracked_helper
 	else
 		for VCSH_REPO_NAME in $(list); do
-			get_files
+			get_files "$VCSH_REPO_NAME"
 		done | list_tracked_helper
 	fi
 	return 0
@@ -397,7 +396,7 @@ use() {
 
 which() {
 	output=$(for VCSH_REPO_NAME in $(list); do
-		get_files | grep -- "$1" | sed "s/^/$VCSH_REPO_NAME: /"
+		get_files "$VCSH_REPO_NAME" | grep -- "$1" | sed "s/^/$VCSH_REPO_NAME: /"
 	done | sort -u)
 	if [ -z "$output" ]; then
 		fatal "'$1' does not exist" 1
