@@ -7,27 +7,27 @@ doit() {
 }
 
 @test "Delete requires repo name" {
-	! $VCSH delete
+	! $VCSH delete || false
 }
 
 @test "Repository to be deleted must exist" {
-	! $VCSH delete foo
+	! $VCSH delete foo || false
 }
 
 @test "Delete requires confirmation" {
 	$VCSH init foo
 
-	! $VCSH delete foo < /dev/null
+	! $VCSH delete foo < /dev/null || false
 	run $VCSH list
 	assert "$status" -eq 0
 	assert "$output" = "foo"
 
-	! echo | $VCSH delete foo
+	! echo | $VCSH delete foo || false
 	run $VCSH list
 	assert "$status" -eq 0
 	assert "$output" = "foo"
 
-	! echo no | $VCSH delete foo
+	! echo no | $VCSH delete foo || false
 	run $VCSH list
 	assert "$status" -eq 0
 	assert "$output" = "foo"
@@ -66,7 +66,7 @@ doit() {
 	touch randomtexttofind
 	$VCSH foo add randomtexttofind
 
-	: | $VCSH delete foo | grep -Fq randomtexttofind
+	: | $VCSH delete foo | assert_grep -F randomtexttofind
 }
 
 @test "Delete lists committed files before confirmation" {
@@ -75,7 +75,7 @@ doit() {
 	$VCSH foo add randomtexttofind
 	$VCSH foo commit -m 'a'
 
-	: | $VCSH delete foo | grep -Fq randomtexttofind
+	: | $VCSH delete foo | assert_grep -F randomtexttofind
 }
 
 @test "Delete lists files staged for removal before confirmation" {
@@ -87,7 +87,7 @@ doit() {
 	$VCSH foo commit -m 'a'
 	$VCSH foo rm --cached randomtexttofind
 
-	: | $VCSH delete foo | grep -Fq randomtexttofind
+	: | $VCSH delete foo | assert_grep -F randomtexttofind
 }
 
 @test "Delete removes corresponding files" {
@@ -148,14 +148,14 @@ doit() {
 	$VCSH init d
 
 	doit | $VCSH delet a
-	! $VCSH list | grep -Fqx a
+	! $VCSH list | assert_grep -Fx a || false
 
 	doit | $VCSH dele b
-	! $VCSH list | grep -Fqx b
+	! $VCSH list | assert_grep -Fx b || false
 
 	doit | $VCSH del c
-	! $VCSH list | grep -Fqx c
+	! $VCSH list | assert_grep -Fx c || false
 
 	doit | $VCSH de d
-	! $VCSH list | grep -Fqx d
+	! $VCSH list | assert_grep -Fx d || false
 }
