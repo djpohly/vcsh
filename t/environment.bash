@@ -57,3 +57,38 @@ num_gitrepos() {
 	# Prints the number of apparent Git repositories below $1
 	find "$1" -mindepth 1 -type d -name '*.git' | wc -l
 }
+
+assert() {
+	if [ $# -ne 3 ]; then
+		echo 'assert: requires three arguments (forgot to quote?)' >&2
+		return 2
+	fi
+
+	if ! test "$@"; then
+		echo "assertion \"$2\" failed" >&2
+		echo "actual   : \"$1\"" >&2
+		echo "reference: \"$3\"" >&2
+		return 1
+	fi
+}
+
+assert_file() {
+	negate=
+	if [ "$1" = "!" ]; then
+		if [ $# -ne 3 ]; then
+			echo 'assert_file: requires two arguments after ! (forgot to quote?)' >&2
+			return 2
+		fi
+		negate='! '
+		shift
+	elif [ $# -ne 2 ]; then
+		echo 'assert_file: requires two arguments (forgot to quote?)' >&2
+		return 2
+	fi
+
+	if ! test $negate "$@"; then
+		echo "assertion \"$negate$1\" failed" >&2
+		echo "file: \"$2\"" >&2
+		return 1
+	fi
+}
