@@ -13,7 +13,6 @@ all: $(all)
 install: all
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 $(self) $(DESTDIR)$(PREFIX)/bin
-	install -m 0644 $(self)-functions $(DESTDIR)$(PREFIX)/bin
 	install -d $(DESTDIR)$(PREFIX)/share/man/man1
 	install -m 0644 $(manpages) $(DESTDIR)$(PREFIX)/share/man/man1
 	install -d $(DESTDIR)$(DOCDIR)
@@ -32,7 +31,6 @@ clean:
 
 uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/bin/$(self)
-	rm -rf $(DESTDIR)$(PREFIX)/bin/$(self)-functions
 	rm -rf $(DESTDIR)$(PREFIX)/share/man/man1/$(self).1
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(ZSHDIR)/_$(self)
