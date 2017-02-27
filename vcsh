@@ -354,14 +354,14 @@ status() {
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
-	if [ -n "$VCSH_REPO_NAME" ]; then
-		status_helper $VCSH_REPO_NAME
+	if [ -n "$1" ]; then
+		status_helper "$1"
 		ret=$?
 	else
-		for VCSH_REPO_NAME in $(list); do
-			STATUS=$(status_helper $VCSH_REPO_NAME "$COLORING")
+		for repo in $(list); do
+			STATUS=$(status_helper "$repo" "$COLORING")
 			ret=$?
-			[ -n "$STATUS" -o -z "$VCSH_STATUS_TERSE" ] && echo "$VCSH_REPO_NAME:"
+			[ -n "$STATUS" -o -z "$VCSH_STATUS_TERSE" ] && echo "$repo:"
 			[ -n "$STATUS" ]            && echo "$STATUS"
 			[ -z "$VCSH_STATUS_TERSE" ] && echo
 		done
