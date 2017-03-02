@@ -590,7 +590,6 @@ run_vcsh_cmd() {
 	VCSH_COMMAND=$(echo "$1" | sed 's/-/_/g'); export VCSH_COMMAND
 	shift
 	source_cmd_configs "$VCSH_COMMAND"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"
 	hook pre-command
 	"$VCSH_COMMAND" "$@"
