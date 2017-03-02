@@ -600,11 +600,12 @@ run_vcsh_cmd() {
 }
 
 run_repo_cmd() {
-	enter_repo "$1"
+	repo=$1
 	shift
 	VCSH_COMMAND=$(echo "$1" | sed 's/-/_/g'); export VCSH_COMMAND
 	shift
 	source_cmd_configs "$VCSH_COMMAND"
+	enter_repo "$repo"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"
 	hook pre-command
