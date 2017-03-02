@@ -705,8 +705,7 @@ if [ x"$cmd" = x'clone' ]; then
 	fi
 	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
-	enter_repo "$repo"
-	run_vcsh_cmd clone "$@"
+	run_repo_cmd "$repo" clone "$@"
 elif [ x"$cmd" = x'which' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
 	[ -n "$2" ] && fatal "$cmd: too many parameters" 1
