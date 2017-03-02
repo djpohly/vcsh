@@ -621,9 +621,9 @@ run_vcsh_cmd() {
 }
 
 run_repo_cmd() {
-	repo=$1
-	shift
 	VCSH_COMMAND=$(echo "$1" | sed 's/-/_/g'); export VCSH_COMMAND
+	shift
+	repo=$1
 	shift
 	source_cmd_configs "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"
@@ -724,7 +724,7 @@ if [ x"$cmd" = x'clone' ]; then
 	fi
 	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
-	run_repo_cmd "$repo" clone "$@"
+	run_repo_cmd clone "$repo" "$@"
 elif [ x"$cmd" = x'which' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
 	[ -n "$2" ] && fatal "$cmd: too many parameters" 1
@@ -736,7 +736,7 @@ elif [ x"$cmd" = x'delete' ]           ||
      [ x"$cmd" = x'upgrade' ]          ||
      [ x"$cmd" = x'write-gitignore' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	run_repo_cmd "$1" "$cmd" "$@"
+	run_repo_cmd "$cmd" "$1" "$@"
 elif [ x"$cmd" = x'rename' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
 	repo=$1
@@ -744,13 +744,13 @@ elif [ x"$cmd" = x'rename' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify a target name" 1
 	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
-	run_repo_cmd "$repo" rename "$@"
+	run_repo_cmd rename "$repo" "$@"
 elif [ x"$cmd" = x'run' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
 	repo=$1
 	shift 1
 	[ -z "$1" ] && fatal "$cmd: please specify a command" 1
-	run_repo_cmd "$repo" run "$@"
+	run_repo_cmd run "$repo" "$@"
 elif [ x"$cmd" = x'foreach' ]; then
 	[ -z "$1" ] && fatal "foreach: please specify a command" 1
 	run_vcsh_cmd foreach "$@"
@@ -766,5 +766,5 @@ elif [ x"$cmd" = x'status' ]; then
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
 	fi
-	run_repo_cmd "$1" status "$@"
+	run_repo_cmd status "$1" "$@"
 fi
