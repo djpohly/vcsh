@@ -218,21 +218,14 @@ list() {
 }
 
 list_tracked() {
-	repo=$1
-	if [ -n "$repo" ]; then
-		enter_repo "$repo"
-		git ls-files | list_tracked_helper
-	else
-		for repo in $(list); do
-			enter_repo "$repo"
-			git ls-files
-		done | list_tracked_helper
+	if [ -z "$1" ]; then
+		set -- $(list)
 	fi
+	for repo in "$@"; do
+		enter_repo "$repo"
+		git ls-files | sed "s,^,$(printf '%s\n' "$VCSH_BASE/" | sed 's/[,\&]/\\&/g'),"
+	done | sort -u
 	return 0
-}
-
-list_tracked_helper() {
-	sed "s,^,$(printf '%s\n' "$VCSH_BASE/" | sed 's/[,\&]/\\&/g')," | sort -u
 }
 
 list_tracked_by() {
