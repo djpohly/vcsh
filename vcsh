@@ -141,18 +141,16 @@ delete() {
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	use
 	info "This operation WILL DESTROY DATA!"
-	files=$(git ls-files)
 	echo "These files will be deleted:
-
-$files
+"
+	git ls-files
+	echo "
 
 AGAIN, THIS WILL DELETE YOUR DATA!
 To continue, type 'Yes, do as I say'"
 	read answer
 	[ "x$answer" = 'xYes, do as I say' ] || exit 16
-	for file in $files; do
-		rm -f $file || info "could not delete '$file', continuing with deletion"
-	done
+	git rm -rf .
 	rm -rf "$GIT_DIR" || error "could not delete '$GIT_DIR'"
 	return 0
 }

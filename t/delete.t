@@ -114,8 +114,6 @@ doit() {
 }
 
 @test "Delete handles filenames with spaces properly" {
-	skip "BUG"
-
 	$VCSH init foo
 	touch a b 'a b'
 	$VCSH foo add 'a b'
@@ -128,8 +126,6 @@ doit() {
 }
 
 @test "Delete handles filenames with wildcard characters properly" {
-	skip "BUG"
-
 	$VCSH init foo
 	touch a b '?'
 	$VCSH foo add '\?'
