@@ -217,18 +217,15 @@ list() {
 	return 0
 }
 
-get_files() {
-	enter_repo "$1"
-	git ls-files
-}
-
 list_tracked() {
 	repo=$1
 	if [ -n "$repo" ]; then
-		get_files "$repo" | list_tracked_helper
+		enter_repo "$repo"
+		git ls-files | list_tracked_helper
 	else
 		for repo in $(list); do
-			get_files "$repo"
+			enter_repo "$repo"
+			git ls-files
 		done | list_tracked_helper
 	fi
 	return 0
@@ -412,7 +409,8 @@ use() {
 
 which() {
 	output=$(for repo in $(list); do
-		get_files "$repo" | grep -- "$1" | sed "s/^/$repo: /"
+		enter_repo "$repo"
+		git ls-files | grep -- "$1" | sed "s/^/$repo: /"
 	done | sort -u)
 	if [ -z "$output" ]; then
 		fatal "'$1' does not exist" 1
