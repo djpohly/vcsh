@@ -662,78 +662,78 @@ validate_env_options
 
 debug $(git version)
 
-VCSH_COMMAND=$(normalize_cmd "$1")
+cmd=$(normalize_cmd "$1")
 
 # Unrecognized command = implicit enter or run
-if [ -z "$VCSH_COMMAND" ]; then
+if [ -z "$cmd" ]; then
 	if [ -z "$2" ]; then
-		VCSH_COMMAND=enter
+		cmd=enter
 		set -- enter "$@"
 	else
-		VCSH_COMMAND=run
+		cmd=run
 		repo=$1
 		shift 1
 		set -- run "$repo" git "$@"
 	fi
 fi
 
-# Command now stored in $VCSH_COMMAND
+# Command now stored in $cmd
 shift 1
 
 # First handle commands which exit immediately
-if [ x"$VCSH_COMMAND" = x'version' ]; then
+if [ x"$cmd" = x'version' ]; then
 	echo "$SELF $VERSION"
 	git version
 	exit
 fi
-if [ x"$VCSH_COMMAND" = x'help' ]; then
+if [ x"$cmd" = x'help' ]; then
 	# $1 is empty, or 'help'
 	help && exit
 fi
 
 check_needed_dirs
 
-if [ x"$VCSH_COMMAND" = x'clone' ]; then
+if [ x"$cmd" = x'clone' ]; then
 	parse_clone_args "$@"
 	run_vcsh_cmd clone "$@"
-elif [ x"$VCSH_COMMAND" = x'which' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
-	[ -n "$2" ] && fatal "$VCSH_COMMAND: too many parameters" 1
+elif [ x"$cmd" = x'which' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
+	[ -n "$2" ] && fatal "$cmd: too many parameters" 1
 	run_vcsh_cmd which "$@"
-elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
-     [ x"$VCSH_COMMAND" = x'enter' ]            ||
-     [ x"$VCSH_COMMAND" = x'init' ]             ||
-     [ x"$VCSH_COMMAND" = x'list-tracked-by' ]  ||
-     [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
-     [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
+elif [ x"$cmd" = x'delete' ]           ||
+     [ x"$cmd" = x'enter' ]            ||
+     [ x"$cmd" = x'init' ]             ||
+     [ x"$cmd" = x'list-tracked-by' ]  ||
+     [ x"$cmd" = x'upgrade' ]          ||
+     [ x"$cmd" = x'write-gitignore' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
 	enter_repo "$1"
-	run_vcsh_cmd "$VCSH_COMMAND" "$@"
-elif [ x"$VCSH_COMMAND" = x'rename' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
+	run_vcsh_cmd "$cmd" "$@"
+elif [ x"$cmd" = x'rename' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
 	enter_repo "$1"
 	shift 1
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
+	[ -z "$1" ] && fatal "$cmd: please specify a target name" 1
 	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	run_vcsh_cmd rename "$@"
-elif [ x"$VCSH_COMMAND" = x'run' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
+elif [ x"$cmd" = x'run' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
 	enter_repo "$1"
 	shift 1
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a command" 1
+	[ -z "$1" ] && fatal "$cmd: please specify a command" 1
 	run_vcsh_cmd run "$@"
-elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
+elif [ x"$cmd" = x'foreach' ]; then
 	[ -z "$1" ] && fatal "foreach: please specify a command" 1
 	run_vcsh_cmd foreach "$@"
-elif [ x"$VCSH_COMMAND" = x'commit' ] ||
-     [ x"$VCSH_COMMAND" = x'list'   ] ||
-     [ x"$VCSH_COMMAND" = x'pull'   ] ||
-     [ x"$VCSH_COMMAND" = x'push'   ] ||
-     [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
-     [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
-	run_vcsh_cmd "$VCSH_COMMAND" "$@"
-elif [ x"$VCSH_COMMAND" = x'status' ]; then
+elif [ x"$cmd" = x'commit' ] ||
+     [ x"$cmd" = x'list'   ] ||
+     [ x"$cmd" = x'pull'   ] ||
+     [ x"$cmd" = x'push'   ] ||
+     [ x"$cmd" = x'list-tracked' ] ||
+     [ x"$cmd" = x'list-untracked' ]; then
+	run_vcsh_cmd "$cmd" "$@"
+elif [ x"$cmd" = x'status' ]; then
 	if [ x"$1" = x'--terse' ]; then
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
