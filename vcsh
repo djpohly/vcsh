@@ -129,7 +129,7 @@ commit() {
 		echo "$repo: "
 		enter_repo "$repo"
 		use
-		git commit --untracked-files=no --quiet $@
+		git commit --untracked-files=no --quiet "$@"
 		ret=$?
 		echo
 	done
