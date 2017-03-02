@@ -629,7 +629,17 @@ run_vcsh_cmd() {
 run_repo_cmd() {
 	enter_repo "$1"
 	shift
-	run_vcsh_cmd "$@"
+	VCSH_COMMAND=$(echo "$1" | sed 's/-/_/g'); export VCSH_COMMAND
+	shift
+	source_cmd_configs "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	verbose "$VCSH_COMMAND begin"
+	hook pre-command
+	"$VCSH_COMMAND" "$@"
+	VCSH_COMMAND_RETURN_CODE=$?
+	hook post-command
+	verbose "$VCSH_COMMAND end, exiting"
+	return $VCSH_COMMAND_RETURN_CODE
 }
 
 # If '.git-HEAD' is appended to the version, you are seeing an unreleased
