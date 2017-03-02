@@ -89,6 +89,8 @@ info() {
 }
 
 clone() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	hook pre-clone
 	init "$VCSH_REPO_NAME"
@@ -139,6 +141,8 @@ commit() {
 }
 
 delete() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	use
@@ -160,6 +164,8 @@ To continue, type 'Yes, do as I say'"
 }
 
 enter() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	hook pre-enter
 	use
@@ -203,6 +209,8 @@ hook() {
 }
 
 init() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	hook pre-init
 	[ ! -e "$GIT_DIR" ] || fatal "'$GIT_DIR' exists" 10
@@ -233,6 +241,8 @@ list_tracked() {
 }
 
 list_tracked_by() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	list_tracked $1
 	return 0
@@ -323,6 +333,8 @@ retire() {
 }
 
 rename() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
@@ -338,6 +350,8 @@ rename() {
 }
 
 run() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	hook pre-run
 	use
@@ -348,6 +362,8 @@ run() {
 }
 
 status() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
@@ -381,6 +397,8 @@ status_helper() {
 }
 
 upgrade() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	hook pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
@@ -423,6 +441,8 @@ which() {
 }
 
 write_gitignore() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
 	# Don't do anything if the user does not want to write gitignore
 	if [ "x$VCSH_GITIGNORE" = 'xnone' ]; then
@@ -608,8 +628,6 @@ run_repo_cmd() {
 	source_cmd_configs "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"
 	hook pre-command
-	enter_repo "$repo"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	"$VCSH_COMMAND" "$repo" "$@"
 	VCSH_COMMAND_RETURN_CODE=$?
 	hook post-command
