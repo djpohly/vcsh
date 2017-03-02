@@ -711,17 +711,19 @@ elif [ x"$cmd" = x'delete' ]           ||
 	run_vcsh_cmd "$cmd" "$@"
 elif [ x"$cmd" = x'rename' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	enter_repo "$1"
+	repo=$1
 	shift 1
 	[ -z "$1" ] && fatal "$cmd: please specify a target name" 1
 	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
+	enter_repo "$repo"
 	run_vcsh_cmd rename "$@"
 elif [ x"$cmd" = x'run' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	enter_repo "$1"
+	repo=$1
 	shift 1
 	[ -z "$1" ] && fatal "$cmd: please specify a command" 1
+	enter_repo "$repo"
 	run_vcsh_cmd run "$@"
 elif [ x"$cmd" = x'foreach' ]; then
 	[ -z "$1" ] && fatal "foreach: please specify a command" 1
