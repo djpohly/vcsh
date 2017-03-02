@@ -515,16 +515,13 @@ check_needed_dirs() {
 }
 
 enter_repo() {
-	# Did we receive a directory instead of a name?
+	# Allow specifying either the name or GIT_DIR
 	# Mangle the input to fit normal operation.
 	if echo "$1" | grep -q '/'; then
-		set -- "$(basename "$1" .git)" "$1"
-	fi
-
-	VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
-	if [ -n "$2" ]; then
-		GIT_DIR=$2; export GIT_DIR
+		GIT_DIR=$1; export GIT_DIR
+		VCSH_REPO_NAME=$(basename "$GIT_DIR" .git); export VCSH_REPO_NAME
 	else
+		VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 		GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 	fi
 }
