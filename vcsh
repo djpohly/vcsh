@@ -89,8 +89,9 @@ info() {
 }
 
 clone() {
+	shift
 	hook pre-clone
-	init
+	init "$VCSH_REPO_NAME"
 	git remote add origin "$GIT_REMOTE"
 	git checkout -b "$VCSH_BRANCH" || return $?
 	git config branch."$VCSH_BRANCH".remote origin
@@ -138,6 +139,7 @@ commit() {
 }
 
 delete() {
+	shift
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	use
 	info "This operation WILL DESTROY DATA!"
@@ -158,6 +160,7 @@ To continue, type 'Yes, do as I say'"
 }
 
 enter() {
+	shift
 	hook pre-enter
 	use
 	$SHELL
@@ -200,12 +203,13 @@ hook() {
 }
 
 init() {
+	shift
 	hook pre-init
 	[ ! -e "$GIT_DIR" ] || fatal "'$GIT_DIR' exists" 10
 	mkdir -p "$VCSH_BASE" || fatal "could not create '$VCSH_BASE'" 50
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	git init --shared=0600
-	upgrade
+	upgrade "$VCSH_REPO_NAME"
 	hook post-init
 	return 0
 }
@@ -229,6 +233,7 @@ list_tracked() {
 }
 
 list_tracked_by() {
+	shift
 	list_tracked $1
 	return 0
 }
@@ -318,6 +323,7 @@ retire() {
 }
 
 rename() {
+	shift
 	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
 	mv -f "$GIT_DIR" "$GIT_DIR_NEW" || fatal "Could not mv '$GIT_DIR' '$GIT_DIR_NEW'" 52
@@ -327,11 +333,12 @@ rename() {
 	GIT_DIR=$GIT_DIR_NEW
 	VCSH_REPO_NAME=$VCSH_REPO_NAME_NEW
 	# ..and clobber all old configuration
-	upgrade
+	upgrade "$VCSH_REPO_NAME"
 	return 0
 }
 
 run() {
+	shift
 	hook pre-run
 	use
 	"$@"
@@ -341,6 +348,7 @@ run() {
 }
 
 status() {
+	shift
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
@@ -373,6 +381,7 @@ status_helper() {
 }
 
 upgrade() {
+	shift
 	hook pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
 	# because otherwise Git complains "fatal: core.bare and core.worktree
@@ -414,6 +423,7 @@ which() {
 }
 
 write_gitignore() {
+	shift
 	# Don't do anything if the user does not want to write gitignore
 	if [ "x$VCSH_GITIGNORE" = 'xnone' ]; then
 		info "Not writing gitignore as '\$VCSH_GITIGNORE' is set to 'none'"
@@ -600,7 +610,7 @@ run_repo_cmd() {
 	hook pre-command
 	enter_repo "$repo"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	"$VCSH_COMMAND" "$@"
+	"$VCSH_COMMAND" "$repo" "$@"
 	VCSH_COMMAND_RETURN_CODE=$?
 	hook post-command
 	verbose "$VCSH_COMMAND end, exiting"
