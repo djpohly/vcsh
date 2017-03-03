@@ -366,7 +366,6 @@ run() {
 status() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
@@ -726,16 +725,12 @@ elif [ x"$cmd" = x'delete' ]           ||
 	run_vcsh_cmd "$cmd" "$1" "$@"
 elif [ x"$cmd" = x'rename' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	repo=$1
-	shift 1
-	[ -z "$1" ] && fatal "$cmd: please specify a target name" 1
-	run_vcsh_cmd rename "$repo" "$@"
+	[ -z "$2" ] && fatal "$cmd: please specify a target name" 1
+	run_vcsh_cmd rename "$@"
 elif [ x"$cmd" = x'run' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	repo=$1
-	shift 1
-	[ -z "$1" ] && fatal "$cmd: please specify a command" 1
-	run_vcsh_cmd run "$repo" "$@"
+	[ -z "$2" ] && fatal "$cmd: please specify a command" 1
+	run_vcsh_cmd run "$@"
 elif [ x"$cmd" = x'foreach' ]; then
 	[ -z "$1" ] && fatal "foreach: please specify a command" 1
 	run_vcsh_cmd foreach "$@"
@@ -751,5 +746,5 @@ elif [ x"$cmd" = x'status' ]; then
 		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
 		shift
 	fi
-	run_vcsh_cmd status "$1" "$@"
+	run_vcsh_cmd status "$@"
 fi
