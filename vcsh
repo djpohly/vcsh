@@ -111,7 +111,7 @@ clone() {
 	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
 	enter_repo "$repo"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" clone
 	# XXX Should this really be repo_hook if the repo doesn't exist yet?
 	repo_hook "$VCSH_REPO_NAME" pre-clone
 	init "$VCSH_REPO_NAME"
@@ -164,7 +164,7 @@ commit() {
 delete() {
 	[ -z "$1" ] && fatal "delete: please specify repository to work on" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" delete
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	use
 	info "This operation WILL DESTROY DATA!"
@@ -185,7 +185,7 @@ To continue, type 'Yes, do as I say'"
 enter() {
 	[ -z "$1" ] && fatal "enter: please specify repository to work on" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" enter
 	repo_hook "$VCSH_REPO_NAME" pre-enter
 	use
 	$SHELL
@@ -240,7 +240,7 @@ repo_hook() {
 init() {
 	[ -z "$1" ] && fatal "init: please specify repository to work on" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" init
 	# XXX Should this really be repo_hook if the repo doesn't exist yet?
 	repo_hook "$VCSH_REPO_NAME" pre-init
 	[ ! -e "$GIT_DIR" ] || fatal "'$GIT_DIR' exists" 10
@@ -273,7 +273,7 @@ list_tracked() {
 list_tracked_by() {
 	[ -z "$1" ] && fatal "list-tracked-by: please specify repository to work on" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" list_tracked_by
 	list_tracked "$1"
 	return 0
 }
@@ -366,7 +366,7 @@ rename() {
 	[ -z "$1" ] && fatal "rename: please specify repository to work on" 1
 	[ -z "$2" ] && fatal "rename: please specify a target name" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" rename
 	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
@@ -386,7 +386,7 @@ run() {
 	[ -z "$1" ] && fatal "run: please specify repository to work on" 1
 	[ -z "$2" ] && fatal "run: please specify a command" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" run
 	shift
 	repo_hook "$VCSH_REPO_NAME" pre-run
 	use
@@ -407,7 +407,7 @@ status() {
 	fi
 	if [ -n "$1" ]; then
 		enter_repo "$1"
-		[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+		[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" status
 		status_helper "$1"
 		ret=$?
 	else
@@ -438,7 +438,7 @@ status_helper() {
 upgrade() {
 	[ -z "$1" ] && fatal "upgrade: please specify repository to work on" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" upgrade
 	repo_hook "$VCSH_REPO_NAME" pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
 	# because otherwise Git complains "fatal: core.bare and core.worktree
@@ -484,7 +484,7 @@ which() {
 write_gitignore() {
 	[ -z "$1" ] && fatal "write-gitignore: please specify repository to work on" 1
 	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" write_gitignore
 	# Don't do anything if the user does not want to write gitignore
 	if [ "x$VCSH_GITIGNORE" = 'xnone' ]; then
 		info "Not writing gitignore as '\$VCSH_GITIGNORE' is set to 'none'"
