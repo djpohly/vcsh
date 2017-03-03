@@ -364,12 +364,12 @@ run() {
 }
 
 status() {
-	enter_repo "$1"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
 	if [ -n "$1" ]; then
+		enter_repo "$1"
+		[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 		status_helper "$1"
 		ret=$?
 	else
