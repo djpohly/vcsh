@@ -336,6 +336,8 @@ rename() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
+	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
+	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
 	mv -f "$GIT_DIR" "$GIT_DIR_NEW" || fatal "Could not mv '$GIT_DIR' '$GIT_DIR_NEW'" 52
@@ -727,8 +729,6 @@ elif [ x"$cmd" = x'rename' ]; then
 	repo=$1
 	shift 1
 	[ -z "$1" ] && fatal "$cmd: please specify a target name" 1
-	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
-	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	run_vcsh_cmd rename "$repo" "$@"
 elif [ x"$cmd" = x'run' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
