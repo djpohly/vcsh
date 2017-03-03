@@ -89,8 +89,10 @@ info() {
 }
 
 clone() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-clone
-	init
+	init "$VCSH_REPO_NAME"
 	git remote add origin "$GIT_REMOTE"
 	git checkout -b "$VCSH_BRANCH" || return $?
 	git config branch."$VCSH_BRANCH".remote origin
@@ -138,6 +140,8 @@ commit() {
 }
 
 delete() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	use
 	info "This operation WILL DESTROY DATA!"
@@ -156,6 +160,8 @@ To continue, type 'Yes, do as I say'"
 }
 
 enter() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-enter
 	use
 	$SHELL
@@ -198,12 +204,14 @@ hook() {
 }
 
 init() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-init
 	[ ! -e "$GIT_DIR" ] || fatal "'$GIT_DIR' exists" 10
 	mkdir -p "$VCSH_BASE" || fatal "could not create '$VCSH_BASE'" 50
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	git init --shared=0600
-	upgrade
+	upgrade "$VCSH_REPO_NAME"
 	hook post-init
 	return 0
 }
@@ -215,29 +223,21 @@ list() {
 	return 0
 }
 
-get_files() {
-	enter_repo "$1"
-	git ls-files
-}
-
 list_tracked() {
-	repo=$1
-	if [ -n "$repo" ]; then
-		get_files "$repo" | list_tracked_helper
-	else
-		for repo in $(list); do
-			get_files "$repo"
-		done | list_tracked_helper
+	if [ -z "$1" ]; then
+		set -- $(list)
 	fi
+	for repo in "$@"; do
+		enter_repo "$repo"
+		git ls-files | sed "s,^,$(printf '%s\n' "$VCSH_BASE/" | sed 's/[,\&]/\\&/g'),"
+	done | sort -u
 	return 0
 }
 
-list_tracked_helper() {
-	sed "s,^,$(printf '%s\n' "$VCSH_BASE/" | sed 's/[,\&]/\\&/g')," | sort -u
-}
-
 list_tracked_by() {
-	list_tracked $1
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	list_tracked "$1"
 	return 0
 }
 
@@ -326,6 +326,10 @@ retire() {
 }
 
 rename() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
+	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
 	mv -f "$GIT_DIR" "$GIT_DIR_NEW" || fatal "Could not mv '$GIT_DIR' '$GIT_DIR_NEW'" 52
@@ -335,11 +339,14 @@ rename() {
 	GIT_DIR=$GIT_DIR_NEW
 	VCSH_REPO_NAME=$VCSH_REPO_NAME_NEW
 	# ..and clobber all old configuration
-	upgrade
+	upgrade "$VCSH_REPO_NAME"
 	return 0
 }
 
 run() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
+	shift
 	hook pre-run
 	use
 	"$@"
@@ -349,19 +356,26 @@ run() {
 }
 
 status() {
+	terse=
+	if [ x"$1" = x'--terse' ]; then
+		terse=1
+		shift
+	fi
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
 	if [ -n "$1" ]; then
+		enter_repo "$1"
+		[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 		status_helper "$1"
 		ret=$?
 	else
 		for repo in $(list); do
 			STATUS=$(status_helper "$repo" "$COLORING")
 			ret=$?
-			[ -n "$STATUS" -o -z "$VCSH_STATUS_TERSE" ] && echo "$repo:"
-			[ -n "$STATUS" ]            && echo "$STATUS"
-			[ -z "$VCSH_STATUS_TERSE" ] && echo
+			[ -n "$STATUS" -o -z "$terse" ] && echo "$repo:"
+			[ -n "$STATUS" ]                && echo "$STATUS"
+			[ -z "$terse" ]                 && echo
 		done
 	fi
 	return $ret
@@ -381,6 +395,8 @@ status_helper() {
 }
 
 upgrade() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
 	# because otherwise Git complains "fatal: core.bare and core.worktree
@@ -410,7 +426,8 @@ use() {
 
 which() {
 	output=$(for repo in $(list); do
-		get_files "$repo" | grep -- "$1" | sed "s/^/$repo: /"
+		enter_repo "$repo"
+		git ls-files | grep -- "$1" | sed "s/^/$repo: /"
 	done | sort -u)
 	if [ -z "$output" ]; then
 		fatal "'$1' does not exist" 1
@@ -421,6 +438,8 @@ which() {
 }
 
 write_gitignore() {
+	enter_repo "$1"
+	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	# Don't do anything if the user does not want to write gitignore
 	if [ "x$VCSH_GITIGNORE" = 'xnone' ]; then
 		info "Not writing gitignore as '\$VCSH_GITIGNORE' is set to 'none'"
@@ -497,15 +516,11 @@ normalize_cmd() {
 }
 
 check_dir() {
-	check_directory="$1"
-	if [ ! -d "$check_directory" ]; then
-		if [ -e "$check_directory" ]; then
-			fatal "'$check_directory' exists but is not a directory" 13
-		else
-			verbose "attempting to create '$check_directory'"
-			mkdir -p "$check_directory" || fatal "could not create '$check_directory'" 50
-		fi
-	fi
+	[ -d "$1" ] && return
+	[ -e "$1" ] && fatal "'$1' exists but is not a directory" 13
+
+	verbose "attempting to create '$1'"
+	mkdir -p "$1" || fatal "could not create '$1'" 50
 }
 
 check_needed_dirs() {
@@ -524,32 +539,6 @@ enter_repo() {
 		VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 		GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 	fi
-}
-
-parse_clone_args() {
-	local repo
-	VCSH_BRANCH=
-	if [ "$1" = -b ]; then
-		VCSH_BRANCH=$2
-		shift 2
-	fi
-	[ -z "$1" ] && fatal "clone: please specify a remote" 1
-	GIT_REMOTE="$1"
-	shift 1
-	[ -n "$VCSH_BRANCH" ] || if [ "$1" = -b ]; then
-		VCSH_BRANCH=$2
-		shift 2
-	fi
-	if [ -n "$1" ]; then
-		repo=$1
-		shift 1
-		[ -z "$VCSH_BRANCH" ] && [ "$1" = -b ] && VCSH_BRANCH=$2
-	else
-		repo=$(basename "${GIT_REMOTE#*:}" .git)
-	fi
-	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
-	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
-	enter_repo "$repo"
 }
 
 source_configs() {
@@ -611,7 +600,6 @@ run_vcsh_cmd() {
 	VCSH_COMMAND=$(echo "$1" | sed 's/-/_/g'); export VCSH_COMMAND
 	shift
 	source_cmd_configs "$VCSH_COMMAND"
-	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	verbose "$VCSH_COMMAND begin"
 	hook pre-command
 	"$VCSH_COMMAND" "$@"
@@ -657,82 +645,86 @@ validate_env_options
 
 debug $(git version)
 
-VCSH_COMMAND=$(normalize_cmd "$1")
+cmd=$(normalize_cmd "$1")
 
 # Unrecognized command = implicit enter or run
-if [ -z "$VCSH_COMMAND" ]; then
+if [ -z "$cmd" ]; then
 	if [ -z "$2" ]; then
-		VCSH_COMMAND=enter
+		cmd=enter
 		set -- enter "$@"
 	else
-		VCSH_COMMAND=run
+		cmd=run
 		repo=$1
 		shift 1
 		set -- run "$repo" git "$@"
 	fi
 fi
 
-# Command now stored in $VCSH_COMMAND
+# Command now stored in $cmd
 shift 1
 
 # First handle commands which exit immediately
-if [ x"$VCSH_COMMAND" = x'version' ]; then
+if [ x"$cmd" = x'version' ]; then
 	echo "$SELF $VERSION"
 	git version
 	exit
 fi
-if [ x"$VCSH_COMMAND" = x'help' ]; then
+if [ x"$cmd" = x'help' ]; then
 	# $1 is empty, or 'help'
 	help && exit
 fi
 
 check_needed_dirs
 
-if [ x"$VCSH_COMMAND" = x'clone' ]; then
-	parse_clone_args "$@"
-	run_vcsh_cmd clone "$@"
-elif [ x"$VCSH_COMMAND" = x'which' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a filename" 1
-	[ -n "$2" ] && fatal "$VCSH_COMMAND: too many parameters" 1
-	run_vcsh_cmd which "$@"
-elif [ x"$VCSH_COMMAND" = x'delete' ]           ||
-     [ x"$VCSH_COMMAND" = x'enter' ]            ||
-     [ x"$VCSH_COMMAND" = x'init' ]             ||
-     [ x"$VCSH_COMMAND" = x'list-tracked-by' ]  ||
-     [ x"$VCSH_COMMAND" = x'upgrade' ]          ||
-     [ x"$VCSH_COMMAND" = x'write-gitignore' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	enter_repo "$1"
-	run_vcsh_cmd "$VCSH_COMMAND" "$@"
-elif [ x"$VCSH_COMMAND" = x'rename' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	enter_repo "$1"
-	shift 1
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a target name" 1
-	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
-	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
-	run_vcsh_cmd rename "$@"
-elif [ x"$VCSH_COMMAND" = x'run' ]; then
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify repository to work on" 1
-	enter_repo "$1"
-	shift 1
-	[ -z "$1" ] && fatal "$VCSH_COMMAND: please specify a command" 1
-	run_vcsh_cmd run "$@"
-elif [ x"$VCSH_COMMAND" = x'foreach' ]; then
-	[ -z "$1" ] && fatal "foreach: please specify a command" 1
-	run_vcsh_cmd foreach "$@"
-elif [ x"$VCSH_COMMAND" = x'commit' ] ||
-     [ x"$VCSH_COMMAND" = x'list'   ] ||
-     [ x"$VCSH_COMMAND" = x'pull'   ] ||
-     [ x"$VCSH_COMMAND" = x'push'   ] ||
-     [ x"$VCSH_COMMAND" = x'list-tracked' ] ||
-     [ x"$VCSH_COMMAND" = x'list-untracked' ]; then
-	run_vcsh_cmd "$VCSH_COMMAND" "$@"
-elif [ x"$VCSH_COMMAND" = x'status' ]; then
-	if [ x"$1" = x'--terse' ]; then
-		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
-		shift
+if [ x"$cmd" = x'clone' ]; then
+	VCSH_BRANCH=
+	if [ "$1" = -b ]; then
+		VCSH_BRANCH=$2
+		shift 2
 	fi
-	enter_repo "$1"
-	run_vcsh_cmd status "$@"
+	[ -z "$1" ] && fatal "clone: please specify a remote" 1
+	GIT_REMOTE="$1"
+	shift 1
+	[ -n "$VCSH_BRANCH" ] || if [ "$1" = -b ]; then
+		VCSH_BRANCH=$2
+		shift 2
+	fi
+	if [ -n "$1" ]; then
+		repo=$1
+		shift 1
+		[ -z "$VCSH_BRANCH" ] && [ "$1" = -b ] && VCSH_BRANCH=$2
+	else
+		repo=$(basename "${GIT_REMOTE#*:}" .git)
+	fi
+	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
+	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
+	set -- "$repo" "$@"
+elif [ x"$cmd" = x'which' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
+	[ -n "$2" ] && fatal "$cmd: too many parameters" 1
+elif [ x"$cmd" = x'delete' ]           ||
+     [ x"$cmd" = x'enter' ]            ||
+     [ x"$cmd" = x'init' ]             ||
+     [ x"$cmd" = x'list-tracked-by' ]  ||
+     [ x"$cmd" = x'upgrade' ]          ||
+     [ x"$cmd" = x'write-gitignore' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
+elif [ x"$cmd" = x'rename' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
+	[ -z "$2" ] && fatal "$cmd: please specify a target name" 1
+elif [ x"$cmd" = x'run' ]; then
+	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
+	[ -z "$2" ] && fatal "$cmd: please specify a command" 1
+elif [ x"$cmd" = x'foreach' ]; then
+	[ -z "$1" ] && fatal "foreach: please specify a command" 1
+elif [ x"$cmd" = x'commit' ] ||
+     [ x"$cmd" = x'list'   ] ||
+     [ x"$cmd" = x'pull'   ] ||
+     [ x"$cmd" = x'push'   ] ||
+     [ x"$cmd" = x'status' ] ||
+     [ x"$cmd" = x'list-tracked' ] ||
+     [ x"$cmd" = x'list-untracked' ]; then
+	:
 fi
+
+run_vcsh_cmd "$cmd" "$@"

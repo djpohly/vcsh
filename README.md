@@ -48,7 +48,6 @@ vcsh codebase.  This is currently just for the record; fixing these is not the
 focus on this branch.  However, if it should happen that a code cleanup step
 would fix a known bug, we may be less shy about making it...
 
-- Commit doesn't like arguments that have spaces
 - `VCSH_GITATTRIBUTES` is not validated like other input variables
 - Several variables, if defined prior to running vcsh, can interfere with its
   operation.  Among these are `$VCSH_CONFLICT`, `$ran_once`, and potentially
@@ -73,3 +72,6 @@ far:
 - If `$VCSH_COMMAND_RETURN_CODE` is defined prior to running vcsh, it can
   affect the eventual code returned in some cases.
 - Commit is broken due to missing argument shift
+- Commit doesn't like arguments that have spaces
+- Delete may delete the wrong files if there are special characters in the
+  repository's filenames (!)
