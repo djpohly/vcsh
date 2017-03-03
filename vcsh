@@ -112,7 +112,8 @@ clone() {
 	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
 	enter_repo "$repo"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	hook pre-clone
+	# XXX Should this really be repo_hook if the repo doesn't exist yet?
+	repo_hook "$VCSH_REPO_NAME" pre-clone
 	init "$VCSH_REPO_NAME"
 	git remote add origin "$GIT_REMOTE"
 	git checkout -b "$VCSH_BRANCH" || return $?
@@ -129,7 +130,7 @@ clone() {
 	else
 		git fetch origin
 	fi
-	hook pre-merge
+	repo_hook "$VCSH_REPO_NAME" pre-merge
 	git ls-tree -r --name-only origin/"$VCSH_BRANCH" | (while read object; do
 		[ -e "$object" ] &&
 			error "'$object' exists." &&
@@ -139,10 +140,10 @@ clone() {
 		fatal "will stop after fetching and not try to merge!
   Once this situation has been resolved, run 'vcsh $VCSH_REPO_NAME pull' to finish cloning." 17
 	git -c merge.ff=true merge origin/"$VCSH_BRANCH"
-	hook post-merge
-	hook post-clone
+	repo_hook "$VCSH_REPO_NAME" post-merge
+	repo_hook "$VCSH_REPO_NAME" post-clone
 	retire
-	hook post-clone-retired
+	repo_hook "$VCSH_REPO_NAME" post-clone-retired
 	return 0
 }
 
@@ -185,10 +186,10 @@ enter() {
 	[ -z "$1" ] && fatal "enter: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	hook pre-enter
+	repo_hook "$VCSH_REPO_NAME" pre-enter
 	use
 	$SHELL
-	hook post-enter
+	repo_hook "$VCSH_REPO_NAME" post-enter
 	return 0
 }
 
@@ -220,7 +221,16 @@ git_dir_exists() {
 }
 
 hook() {
-	for hook in "$VCSH_HOOK_D/$1"* "$VCSH_HOOK_D/$VCSH_REPO_NAME.$1"*; do
+	for hook in "$VCSH_HOOK_D/$1"*; do
+		[ -x "$hook" ] || continue
+		verbose "executing '$hook'"
+		"$hook"
+	done
+}
+
+repo_hook() {
+	hook "$2"
+	for hook in "$VCSH_HOOK_D/$1.$2"*; do
 		[ -x "$hook" ] || continue
 		verbose "executing '$hook'"
 		"$hook"
@@ -231,13 +241,14 @@ init() {
 	[ -z "$1" ] && fatal "init: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	hook pre-init
+	# XXX Should this really be repo_hook if the repo doesn't exist yet?
+	repo_hook "$VCSH_REPO_NAME" pre-init
 	[ ! -e "$GIT_DIR" ] || fatal "'$GIT_DIR' exists" 10
 	mkdir -p "$VCSH_BASE" || fatal "could not create '$VCSH_BASE'" 50
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	git init --shared=0600
 	upgrade "$VCSH_REPO_NAME"
-	hook post-init
+	repo_hook "$VCSH_REPO_NAME" post-init
 	return 0
 }
 
@@ -377,11 +388,11 @@ run() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
-	hook pre-run
+	repo_hook "$VCSH_REPO_NAME" pre-run
 	use
 	"$@"
 	ret=$?
-	hook post-run
+	repo_hook "$VCSH_REPO_NAME" post-run
 	return $ret
 }
 
@@ -428,7 +439,7 @@ upgrade() {
 	[ -z "$1" ] && fatal "upgrade: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	hook pre-upgrade
+	repo_hook "$VCSH_REPO_NAME" pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
 	# because otherwise Git complains "fatal: core.bare and core.worktree
 	# do not make sense"
@@ -446,7 +457,7 @@ upgrade() {
 	use
 	[ -e "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME" ] && git add -f "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME"
 	[ -e "$VCSH_BASE/.gitattributes.d/$VCSH_REPO_NAME" ] && git add -f "$VCSH_BASE/.gitattributes.d/$VCSH_REPO_NAME"
-	hook post-upgrade
+	repo_hook "$VCSH_REPO_NAME" post-upgrade
 	return 0
 }
 
