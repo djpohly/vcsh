@@ -160,7 +160,9 @@ for_each_repo() {
 commit() {
 	hook pre-commit
 	for_each_repo commit_one "$@"
+	ret=$?
 	hook post-commit
+	return $ret
 }
 
 commit_one() {
