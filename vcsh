@@ -161,6 +161,7 @@ commit() {
 }
 
 delete() {
+	[ -z "$1" ] && fatal "delete: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
@@ -181,6 +182,7 @@ To continue, type 'Yes, do as I say'"
 }
 
 enter() {
+	[ -z "$1" ] && fatal "enter: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-enter
@@ -191,6 +193,7 @@ enter() {
 }
 
 foreach() {
+	[ -z "$1" ] && fatal "foreach: please specify a command" 1
 	hook pre-foreach
 
 	# We default to prefixing `git` to all commands passed to foreach, but
@@ -225,6 +228,7 @@ hook() {
 }
 
 init() {
+	[ -z "$1" ] && fatal "init: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-init
@@ -256,6 +260,7 @@ list_tracked() {
 }
 
 list_tracked_by() {
+	[ -z "$1" ] && fatal "list-tracked-by: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	list_tracked "$1"
@@ -347,6 +352,8 @@ retire() {
 }
 
 rename() {
+	[ -z "$1" ] && fatal "rename: please specify repository to work on" 1
+	[ -z "$2" ] && fatal "rename: please specify a target name" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
@@ -365,6 +372,8 @@ rename() {
 }
 
 run() {
+	[ -z "$1" ] && fatal "run: please specify repository to work on" 1
+	[ -z "$2" ] && fatal "run: please specify a command" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	shift
@@ -416,6 +425,7 @@ status_helper() {
 }
 
 upgrade() {
+	[ -z "$1" ] && fatal "upgrade: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-upgrade
@@ -446,6 +456,8 @@ use() {
 }
 
 which() {
+	[ -z "$1" ] && fatal "which: please specify a filename" 1
+	[ -n "$2" ] && fatal "which: too many parameters" 1
 	output=$(for repo in $(list); do
 		enter_repo "$repo"
 		git ls-files | grep -- "$1" | sed "s/^/$repo: /"
@@ -459,6 +471,7 @@ which() {
 }
 
 write_gitignore() {
+	[ -z "$1" ] && fatal "write-gitignore: please specify repository to work on" 1
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	# Don't do anything if the user does not want to write gitignore
@@ -696,35 +709,4 @@ if [ x"$cmd" = x'help' ]; then
 fi
 
 check_needed_dirs
-
-# Check for required arguments early
-if   [ x"$cmd" = x'clone' ]  ||
-     [ x"$cmd" = x'commit' ] ||
-     [ x"$cmd" = x'list'   ] ||
-     [ x"$cmd" = x'pull'   ] ||
-     [ x"$cmd" = x'push'   ] ||
-     [ x"$cmd" = x'status' ] ||
-     [ x"$cmd" = x'list-tracked' ] ||
-     [ x"$cmd" = x'list-untracked' ]; then
-	:
-elif [ x"$cmd" = x'which' ]; then
-	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
-	[ -n "$2" ] && fatal "$cmd: too many parameters" 1
-elif [ x"$cmd" = x'delete' ]           ||
-     [ x"$cmd" = x'enter' ]            ||
-     [ x"$cmd" = x'init' ]             ||
-     [ x"$cmd" = x'list-tracked-by' ]  ||
-     [ x"$cmd" = x'upgrade' ]          ||
-     [ x"$cmd" = x'write-gitignore' ]; then
-	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-elif [ x"$cmd" = x'rename' ]; then
-	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	[ -z "$2" ] && fatal "$cmd: please specify a target name" 1
-elif [ x"$cmd" = x'run' ]; then
-	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	[ -z "$2" ] && fatal "$cmd: please specify a command" 1
-elif [ x"$cmd" = x'foreach' ]; then
-	[ -z "$1" ] && fatal "foreach: please specify a command" 1
-fi
-
 run_vcsh_cmd "$cmd" "$@"
