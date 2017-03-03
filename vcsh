@@ -477,11 +477,6 @@ upgrade() {
 	return 0
 }
 
-use() {
-	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
-	VCSH_DIRECTORY=$VCSH_REPO_NAME; export VCSH_DIRECTORY
-}
-
 which() {
 	[ -z "$1" ] && fatal "which: please specify a filename" 1
 	[ -n "$2" ] && fatal "which: too many parameters" 1
@@ -603,8 +598,9 @@ enter_repo() {
 }
 
 use_repo() {
-	enter_repo "$@"
-	use
+	enter_repo "$1"
+	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
+	VCSH_DIRECTORY=$VCSH_REPO_NAME; export VCSH_DIRECTORY
 }
 
 source_configs() {
