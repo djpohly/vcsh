@@ -89,7 +89,28 @@ info() {
 }
 
 clone() {
-	enter_repo "$1"
+	VCSH_BRANCH=
+	if [ "$1" = -b ]; then
+		VCSH_BRANCH=$2
+		shift 2
+	fi
+	[ -z "$1" ] && fatal "clone: please specify a remote" 1
+	GIT_REMOTE="$1"
+	shift 1
+	[ -n "$VCSH_BRANCH" ] || if [ "$1" = -b ]; then
+		VCSH_BRANCH=$2
+		shift 2
+	fi
+	if [ -n "$1" ]; then
+		repo=$1
+		shift 1
+		[ -z "$VCSH_BRANCH" ] && [ "$1" = -b ] && VCSH_BRANCH=$2
+	else
+		repo=$(basename "${GIT_REMOTE#*:}" .git)
+	fi
+	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
+	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
+	enter_repo "$repo"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
 	hook pre-clone
 	init "$VCSH_REPO_NAME"
@@ -677,28 +698,7 @@ fi
 check_needed_dirs
 
 if [ x"$cmd" = x'clone' ]; then
-	VCSH_BRANCH=
-	if [ "$1" = -b ]; then
-		VCSH_BRANCH=$2
-		shift 2
-	fi
-	[ -z "$1" ] && fatal "clone: please specify a remote" 1
-	GIT_REMOTE="$1"
-	shift 1
-	[ -n "$VCSH_BRANCH" ] || if [ "$1" = -b ]; then
-		VCSH_BRANCH=$2
-		shift 2
-	fi
-	if [ -n "$1" ]; then
-		repo=$1
-		shift 1
-		[ -z "$VCSH_BRANCH" ] && [ "$1" = -b ] && VCSH_BRANCH=$2
-	else
-		repo=$(basename "${GIT_REMOTE#*:}" .git)
-	fi
-	[ -z "$repo" ] && fatal "clone: could not determine repository name" 1
-	[ -n "$VCSH_BRANCH" ] || VCSH_BRANCH=master
-	set -- "$repo" "$@"
+	:
 elif [ x"$cmd" = x'which' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
 	[ -n "$2" ] && fatal "$cmd: too many parameters" 1
