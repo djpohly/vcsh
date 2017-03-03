@@ -364,6 +364,10 @@ run() {
 }
 
 status() {
+	if [ x"$1" = x'--terse' ]; then
+		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
+		shift
+	fi
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
@@ -742,9 +746,5 @@ elif [ x"$cmd" = x'commit' ] ||
      [ x"$cmd" = x'list-untracked' ]; then
 	run_vcsh_cmd "$cmd" "$@"
 elif [ x"$cmd" = x'status' ]; then
-	if [ x"$1" = x'--terse' ]; then
-		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
-		shift
-	fi
 	run_vcsh_cmd status "$@"
 fi
