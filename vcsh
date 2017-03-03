@@ -697,7 +697,15 @@ fi
 
 check_needed_dirs
 
-if [ x"$cmd" = x'clone' ]; then
+# Check for required arguments early
+if   [ x"$cmd" = x'clone' ]  ||
+     [ x"$cmd" = x'commit' ] ||
+     [ x"$cmd" = x'list'   ] ||
+     [ x"$cmd" = x'pull'   ] ||
+     [ x"$cmd" = x'push'   ] ||
+     [ x"$cmd" = x'status' ] ||
+     [ x"$cmd" = x'list-tracked' ] ||
+     [ x"$cmd" = x'list-untracked' ]; then
 	:
 elif [ x"$cmd" = x'which' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify a filename" 1
@@ -717,14 +725,6 @@ elif [ x"$cmd" = x'run' ]; then
 	[ -z "$2" ] && fatal "$cmd: please specify a command" 1
 elif [ x"$cmd" = x'foreach' ]; then
 	[ -z "$1" ] && fatal "foreach: please specify a command" 1
-elif [ x"$cmd" = x'commit' ] ||
-     [ x"$cmd" = x'list'   ] ||
-     [ x"$cmd" = x'pull'   ] ||
-     [ x"$cmd" = x'push'   ] ||
-     [ x"$cmd" = x'status' ] ||
-     [ x"$cmd" = x'list-tracked' ] ||
-     [ x"$cmd" = x'list-untracked' ]; then
-	:
 fi
 
 run_vcsh_cmd "$cmd" "$@"
