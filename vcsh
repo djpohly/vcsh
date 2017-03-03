@@ -151,8 +151,7 @@ for_each_repo() {
 	ret=0
 	for repo in "$VCSH_REPO_D"/*.git; do
 		[ -d "$repo" ] && [ -r "$repo" ] || continue
-		enter_repo "$repo"
-		use
+		use_repo "$repo"
 		"$@" || ret=$?
 	done
 	return $ret
@@ -174,10 +173,9 @@ commit_one() {
 
 delete() {
 	[ -z "$1" ] && fatal "delete: please specify repository to work on" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" delete
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
-	use
 	info "This operation WILL DESTROY DATA!"
 	echo "These files will be deleted:
 "
@@ -195,10 +193,9 @@ To continue, type 'Yes, do as I say'"
 
 enter() {
 	[ -z "$1" ] && fatal "enter: please specify repository to work on" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" enter
 	repo_hook "$VCSH_REPO_NAME" pre-enter
-	use
 	$SHELL
 	repo_hook "$VCSH_REPO_NAME" post-enter
 	return 0
@@ -276,7 +273,7 @@ list_tracked() {
 		for_each_repo list_tracked_one
 	else
 		for repo in "$@"; do
-			enter_repo "$repo"
+			use_repo "$repo"
 			list_tracked_one
 		done
 	fi | sort -u
@@ -289,7 +286,7 @@ list_tracked_one() {
 
 list_tracked_by() {
 	[ -z "$1" ] && fatal "list-tracked-by: please specify repository to work on" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" list_tracked_by
 	list_tracked "$1"
 	return 0
@@ -317,7 +314,7 @@ list_untracked() {
 	repo=$1
 
 	if [ -n "$repo" ]; then
-		enter_repo "$repo"
+		use_repo "$repo"
 		list_untracked_helper
 	else
 		for_each_repo list_untracked_helper
@@ -384,7 +381,7 @@ retire() {
 rename() {
 	[ -z "$1" ] && fatal "rename: please specify repository to work on" 1
 	[ -z "$2" ] && fatal "rename: please specify a target name" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" rename
 	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
@@ -404,11 +401,10 @@ rename() {
 run() {
 	[ -z "$1" ] && fatal "run: please specify repository to work on" 1
 	[ -z "$2" ] && fatal "run: please specify a command" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" run
 	shift
 	repo_hook "$VCSH_REPO_NAME" pre-run
-	use
 	"$@"
 	ret=$?
 	repo_hook "$VCSH_REPO_NAME" post-run
@@ -425,7 +421,7 @@ status() {
 		COLORING="-c color.status=always"
 	fi
 	if [ -n "$1" ]; then
-		enter_repo "$1"
+		use_repo "$1"
 		source_extra_configs "$VCSH_REPO_NAME" status
 		status_helper "$COLORING"
 		ret=$?
@@ -447,7 +443,6 @@ status_one() {
 
 status_helper() {
 	VCSH_GIT_OPTIONS=$1
-	use
 	remote_tracking_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null) && {
 		commits_behind=$(git log ..${remote_tracking_branch} --oneline | wc -l)
 		commits_ahead=$(git log ${remote_tracking_branch}.. --oneline | wc -l)
@@ -459,7 +454,7 @@ status_helper() {
 
 upgrade() {
 	[ -z "$1" ] && fatal "upgrade: please specify repository to work on" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" upgrade
 	repo_hook "$VCSH_REPO_NAME" pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
@@ -476,7 +471,6 @@ upgrade() {
 	[ ! "x$VCSH_GITIGNORE" = 'xnone' ] && git config core.excludesfile ".gitignore.d/$VCSH_REPO_NAME"
 	[ ! "x$VCSH_GITATTRIBUTES" = 'xnone' ] && git config core.attributesfile ".gitattributes.d/$VCSH_REPO_NAME"
 	git config vcsh.vcsh 'true'
-	use
 	[ -e "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME" ] && git add -f "$VCSH_BASE/.gitignore.d/$VCSH_REPO_NAME"
 	[ -e "$VCSH_BASE/.gitattributes.d/$VCSH_REPO_NAME" ] && git add -f "$VCSH_BASE/.gitattributes.d/$VCSH_REPO_NAME"
 	repo_hook "$VCSH_REPO_NAME" post-upgrade
@@ -506,7 +500,7 @@ which_one() {
 
 write_gitignore() {
 	[ -z "$1" ] && fatal "write-gitignore: please specify repository to work on" 1
-	enter_repo "$1"
+	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" write_gitignore
 	# Don't do anything if the user does not want to write gitignore
 	if [ "x$VCSH_GITIGNORE" = 'xnone' ]; then
@@ -514,7 +508,6 @@ write_gitignore() {
 		exit
 	fi
 
-	use
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	local GIT_VERSION="$(git --version)"
 	local GIT_VERSION_MAJOR=$(echo $GIT_VERSION | sed -n 's/.* \([0-9]\)\..*/\1/p')
@@ -607,6 +600,11 @@ enter_repo() {
 		VCSH_REPO_NAME=$1; export VCSH_REPO_NAME
 		GIT_DIR=$VCSH_REPO_D/$VCSH_REPO_NAME.git; export GIT_DIR
 	fi
+}
+
+use_repo() {
+	enter_repo "$@"
+	use
 }
 
 source_configs() {
