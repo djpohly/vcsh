@@ -147,17 +147,28 @@ clone() {
 	return 0
 }
 
-commit() {
-	hook pre-commit
-	for repo in $(list); do
-		echo "$repo: "
+for_each_repo() {
+	ret=0
+	for repo in "$VCSH_REPO_D"/*.git; do
+		[ -d "$repo" ] && [ -r "$repo" ] || continue
 		enter_repo "$repo"
 		use
-		git commit --untracked-files=no --quiet "$@"
-		ret=$?
-		echo
+		"$@" || ret=$?
 	done
+	return $ret
+}
+
+commit() {
+	hook pre-commit
+	for_each_repo commit_one "$@"
 	hook post-commit
+}
+
+commit_one() {
+	echo "$VCSH_REPO_NAME: "
+	git commit --untracked-files=no --quiet "$@"
+	ret=$?
+	echo
 	return $ret
 }
 
@@ -206,14 +217,14 @@ foreach() {
 		fi
 		shift 1
 	done
-	for repo in $(list); do
-		echo "$repo:"
-		enter_repo "$repo"
-		use
-		$command_prefix "$@"
-	done
+	for_each_repo foreach_one $command_prefix "$@"
 	hook post-foreach
 	return 0
+}
+
+foreach_one() {
+	echo "$VCSH_REPO_NAME:"
+	"$@"
 }
 
 git_dir_exists() {
@@ -253,21 +264,27 @@ init() {
 }
 
 list() {
-	for repo in "$VCSH_REPO_D"/*.git; do
-		[ -d "$repo" ] && [ -r "$repo" ] && echo "$(basename "$repo" .git)"
-	done
-	return 0
+	for_each_repo list_one
+}
+
+list_one() {
+	echo "$VCSH_REPO_NAME"
 }
 
 list_tracked() {
 	if [ -z "$1" ]; then
-		set -- $(list)
-	fi
-	for repo in "$@"; do
-		enter_repo "$repo"
-		git ls-files | sed "s,^,$(printf '%s\n' "$VCSH_BASE/" | sed 's/[,\&]/\\&/g'),"
-	done | sort -u
+		for_each_repo list_tracked_one
+	else
+		for repo in "$@"; do
+			enter_repo "$repo"
+			list_tracked_one
+		done
+	fi | sort -u
 	return 0
+}
+
+list_tracked_one() {
+	git ls-files | sed "s,^,$(printf '%s\n' "$VCSH_BASE/" | sed 's/[,\&]/\\&/g'),"
 }
 
 list_tracked_by() {
@@ -300,11 +317,10 @@ list_untracked() {
 	repo=$1
 
 	if [ -n "$repo" ]; then
-		list_untracked_helper $repo
+		enter_repo "$repo"
+		list_untracked_helper
 	else
-		for repo in $(list); do
-			list_untracked_helper $repo
-		done
+		for_each_repo list_untracked_helper
 	fi
 	cat $temp_file_untracked
 
@@ -314,7 +330,6 @@ list_untracked() {
 }
 
 list_untracked_helper() {
-	enter_repo "$1"
 	git ls-files --others $exclude_standard_opt "$directory_opt" | (
 		while read line; do
 			echo "$line"
@@ -332,29 +347,33 @@ list_untracked_helper() {
 
 pull() {
 	hook pre-pull
-	for repo in $(list); do
-		printf '%s: ' "$repo"
-		enter_repo "$repo"
-		use
-		git pull
-		ret=$?
-		echo
-	done
+	for_each_repo pull_one
+	ret=$?
 	hook post-pull
+	return $ret
+}
+
+pull_one() {
+	printf '%s: ' "$VCSH_REPO_NAME"
+	git pull
+	ret=$?
+	echo
 	return $ret
 }
 
 push() {
 	hook pre-push
-	for repo in $(list); do
-		printf '%s: ' "$repo"
-		enter_repo "$repo"
-		use
-		git push
-		ret=$?
-		echo
-	done
+	for_each_repo push_one
+	ret=$?
 	hook post-push
+	return $ret
+}
+
+push_one() {
+	printf '%s: ' "$VCSH_REPO_NAME"
+	git push
+	ret=$?
+	echo
 	return $ret
 }
 
@@ -408,23 +427,26 @@ status() {
 	if [ -n "$1" ]; then
 		enter_repo "$1"
 		source_extra_configs "$VCSH_REPO_NAME" status
-		status_helper "$1"
+		status_helper "$COLORING"
 		ret=$?
 	else
-		for repo in $(list); do
-			STATUS=$(status_helper "$repo" "$COLORING")
-			ret=$?
-			[ -n "$STATUS" -o -z "$terse" ] && echo "$repo:"
-			[ -n "$STATUS" ]                && echo "$STATUS"
-			[ -z "$terse" ]                 && echo
-		done
+		for_each_repo status_one "$terse"
 	fi
 	return $ret
 }
 
+status_one() {
+	terse=$1
+	STATUS=$(status_helper "$COLORING")
+	ret=$?
+	[ -n "$STATUS" -o -z "$terse" ] && echo "$VCSH_REPO_NAME:"
+	[ -n "$STATUS" ]                && echo "$STATUS"
+	[ -z "$terse" ]                 && echo
+	return $ret
+}
+
 status_helper() {
-	enter_repo "$1"
-	VCSH_GIT_OPTIONS=$2
+	VCSH_GIT_OPTIONS=$1
 	use
 	remote_tracking_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null) && {
 		commits_behind=$(git log ..${remote_tracking_branch} --oneline | wc -l)
@@ -469,16 +491,17 @@ use() {
 which() {
 	[ -z "$1" ] && fatal "which: please specify a filename" 1
 	[ -n "$2" ] && fatal "which: too many parameters" 1
-	output=$(for repo in $(list); do
-		enter_repo "$repo"
-		git ls-files | grep -- "$1" | sed "s/^/$repo: /"
-	done | sort -u)
+	output=$(for_each_repo which_one "$1" | sort -u)
 	if [ -z "$output" ]; then
 		fatal "'$1' does not exist" 1
 	else
 		echo "$output"
 	fi
 	return 0
+}
+
+which_one() {
+	git ls-files | grep -- "$1" | sed "s/^/$VCSH_REPO_NAME: /"
 }
 
 write_gitignore() {
