@@ -241,8 +241,7 @@ list_tracked() {
 list_tracked_by() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
-	list_tracked $1
+	list_tracked "$1"
 	return 0
 }
 
@@ -725,7 +724,7 @@ elif [ x"$cmd" = x'delete' ]           ||
      [ x"$cmd" = x'upgrade' ]          ||
      [ x"$cmd" = x'write-gitignore' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
-	run_vcsh_cmd "$cmd" "$1" "$@"
+	run_vcsh_cmd "$cmd" "$@"
 elif [ x"$cmd" = x'rename' ]; then
 	[ -z "$1" ] && fatal "$cmd: please specify repository to work on" 1
 	[ -z "$2" ] && fatal "$cmd: please specify a target name" 1
