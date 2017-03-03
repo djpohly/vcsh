@@ -40,8 +40,6 @@ load environment
 }
 
 @test "commit can handle arguments with spaces" {
-	skip "BUG"
-
 	$VCSH init foo
 	$VCSH init bar
 
