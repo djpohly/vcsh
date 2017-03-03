@@ -91,7 +91,6 @@ info() {
 clone() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	hook pre-clone
 	init "$VCSH_REPO_NAME"
 	git remote add origin "$GIT_REMOTE"
@@ -143,7 +142,6 @@ commit() {
 delete() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
 	use
 	info "This operation WILL DESTROY DATA!"
@@ -164,7 +162,6 @@ To continue, type 'Yes, do as I say'"
 enter() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	hook pre-enter
 	use
 	$SHELL
@@ -209,7 +206,6 @@ hook() {
 init() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	hook pre-init
 	[ ! -e "$GIT_DIR" ] || fatal "'$GIT_DIR' exists" 10
 	mkdir -p "$VCSH_BASE" || fatal "could not create '$VCSH_BASE'" 50
@@ -332,8 +328,7 @@ retire() {
 rename() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
-	VCSH_REPO_NAME_NEW=$1; export VCSH_REPO_NAME_NEW;
+	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
 	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
@@ -402,7 +397,6 @@ status_helper() {
 upgrade() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	hook pre-upgrade
 	# fake-bare repositories are not bare, actually. Set this to false
 	# because otherwise Git complains "fatal: core.bare and core.worktree
@@ -446,7 +440,6 @@ which() {
 write_gitignore() {
 	enter_repo "$1"
 	[ -n "$VCSH_REPO_NAME" ] && source_extra_configs "$VCSH_REPO_NAME" "$VCSH_COMMAND"
-	shift
 	# Don't do anything if the user does not want to write gitignore
 	if [ "x$VCSH_GITIGNORE" = 'xnone' ]; then
 		info "Not writing gitignore as '\$VCSH_GITIGNORE' is set to 'none'"
