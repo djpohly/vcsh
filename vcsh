@@ -364,8 +364,9 @@ run() {
 }
 
 status() {
+	terse=
 	if [ x"$1" = x'--terse' ]; then
-		VCSH_STATUS_TERSE=1; export VCSH_STATUS_TERSE
+		terse=1
 		shift
 	fi
 	if [ -t 1 ]; then
@@ -380,9 +381,9 @@ status() {
 		for repo in $(list); do
 			STATUS=$(status_helper "$repo" "$COLORING")
 			ret=$?
-			[ -n "$STATUS" -o -z "$VCSH_STATUS_TERSE" ] && echo "$repo:"
-			[ -n "$STATUS" ]            && echo "$STATUS"
-			[ -z "$VCSH_STATUS_TERSE" ] && echo
+			[ -n "$STATUS" -o -z "$terse" ] && echo "$repo:"
+			[ -n "$STATUS" ]                && echo "$STATUS"
+			[ -z "$terse" ]                 && echo
 		done
 	fi
 	return $ret
