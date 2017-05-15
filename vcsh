@@ -94,14 +94,14 @@ clone() {
 		VCSH_BRANCH=$2
 		shift 2
 	fi
-	[ -z "$1" ] && fatal "clone: please specify a remote" 1
+	[ $# -lt 1 ] && fatal "clone: please specify a remote" 1
 	GIT_REMOTE="$1"
 	shift 1
 	[ -n "$VCSH_BRANCH" ] || if [ "$1" = -b ]; then
 		VCSH_BRANCH=$2
 		shift 2
 	fi
-	if [ -n "$1" ]; then
+	if [ $# -ge 1 ]; then
 		repo=$1
 		shift 1
 		[ -z "$VCSH_BRANCH" ] && [ "$1" = -b ] && VCSH_BRANCH=$2
@@ -174,7 +174,7 @@ commit_one() {
 }
 
 delete() {
-	[ -z "$1" ] && fatal "delete: please specify repository to work on" 1
+	[ $# -lt 1 ] && fatal "delete: please specify repository to work on" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" delete
 	cd "$VCSH_BASE" || fatal "could not enter '$VCSH_BASE'" 11
@@ -194,7 +194,7 @@ To continue, type 'Yes, do as I say'"
 }
 
 enter() {
-	[ -z "$1" ] && fatal "enter: please specify repository to work on" 1
+	[ $# -lt 1 ] && fatal "enter: please specify repository to work on" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" enter
 	repo_hook "$VCSH_REPO_NAME" pre-enter
@@ -204,7 +204,7 @@ enter() {
 }
 
 foreach() {
-	[ -z "$1" ] && fatal "foreach: please specify a command" 1
+	[ $# -lt 1 ] && fatal "foreach: please specify a command" 1
 	hook pre-foreach
 
 	# We default to prefixing `git` to all commands passed to foreach, but
@@ -248,7 +248,7 @@ repo_hook() {
 }
 
 init() {
-	[ -z "$1" ] && fatal "init: please specify repository to work on" 1
+	[ $# -lt 1 ] && fatal "init: please specify repository to work on" 1
 	enter_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" init
 	# XXX Should this really be repo_hook if the repo doesn't exist yet?
@@ -271,7 +271,7 @@ list_one() {
 }
 
 list_tracked() {
-	if [ -z "$1" ]; then
+	if [ $# -lt 1 ]; then
 		for_each_repo list_tracked_one
 	else
 		for repo in "$@"; do
@@ -287,7 +287,7 @@ list_tracked_one() {
 }
 
 list_tracked_by() {
-	[ -z "$1" ] && fatal "list-tracked-by: please specify repository to work on" 1
+	[ $# -lt 1 ] && fatal "list-tracked-by: please specify repository to work on" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" list_tracked_by
 	list_tracked "$1"
@@ -381,8 +381,8 @@ retire() {
 }
 
 rename() {
-	[ -z "$1" ] && fatal "rename: please specify repository to work on" 1
-	[ -z "$2" ] && fatal "rename: please specify a target name" 1
+	[ $# -lt 1 ] && fatal "rename: please specify repository to work on" 1
+	[ $# -lt 2 ] && fatal "rename: please specify a target name" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" rename
 	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
@@ -401,8 +401,8 @@ rename() {
 }
 
 run() {
-	[ -z "$1" ] && fatal "run: please specify repository to work on" 1
-	[ -z "$2" ] && fatal "run: please specify a command" 1
+	[ $# -lt 1 ] && fatal "run: please specify repository to work on" 1
+	[ $# -lt 2 ] && fatal "run: please specify a command" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" run
 	shift
@@ -422,7 +422,7 @@ status() {
 	if [ -t 1 ]; then
 		COLORING="-c color.status=always"
 	fi
-	if [ -n "$1" ]; then
+	if [ $# -ge 1 ]; then
 		use_repo "$1"
 		source_extra_configs "$VCSH_REPO_NAME" status
 		status_helper "$COLORING"
@@ -455,7 +455,7 @@ status_helper() {
 }
 
 upgrade() {
-	[ -z "$1" ] && fatal "upgrade: please specify repository to work on" 1
+	[ $# -lt 1 ] && fatal "upgrade: please specify repository to work on" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" upgrade
 	repo_hook "$VCSH_REPO_NAME" pre-upgrade
@@ -480,8 +480,8 @@ upgrade() {
 }
 
 which() {
-	[ -z "$1" ] && fatal "which: please specify a filename" 1
-	[ -n "$2" ] && fatal "which: too many parameters" 1
+	[ $# -lt 1 ] && fatal "which: please specify a filename" 1
+	[ $# -ge 2 ] && fatal "which: too many parameters" 1
 	output=$(for_each_repo which_one "$1" | sort -u)
 	if [ -z "$output" ]; then
 		fatal "'$1' does not exist" 1
@@ -496,7 +496,7 @@ which_one() {
 }
 
 write_gitignore() {
-	[ -z "$1" ] && fatal "write-gitignore: please specify repository to work on" 1
+	[ $# -lt 1 ] && fatal "write-gitignore: please specify repository to work on" 1
 	use_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" write_gitignore
 	# Don't do anything if the user does not want to write gitignore
@@ -712,7 +712,7 @@ cmd=$(normalize_cmd "$1")
 
 # Unrecognized command = implicit enter or run
 if [ -z "$cmd" ]; then
-	if [ -z "$2" ]; then
+	if [ $# -lt 2 ]; then
 		cmd=enter
 		set -- enter "$@"
 	else
