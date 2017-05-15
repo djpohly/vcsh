@@ -21,14 +21,6 @@ fatal() {
 	exit $2
 }
 
-source_all() {
-	# Source file even if it's in $PWD and does not have any slashes in it
-	case $1 in
-		*/*) . "$1";;
-		*)   . "$PWD/$1";;
-	esac;
-}
-
 help() {
 	echo "usage: $SELF <options> <command>
 
@@ -142,7 +134,7 @@ clone() {
 	git -c merge.ff=true merge origin/"$VCSH_BRANCH"
 	repo_hook "$VCSH_REPO_NAME" post-merge
 	repo_hook "$VCSH_REPO_NAME" post-clone
-	retire
+	unset VCSH_DIRECTORY
 	repo_hook "$VCSH_REPO_NAME" post-clone-retired
 	return 0
 }
@@ -224,10 +216,6 @@ foreach() {
 foreach_one() {
 	echo "$VCSH_REPO_NAME:"
 	"$@"
-}
-
-git_dir_exists() {
-	[ -d "$1" ] || fatal "no repository found for '$2'" 12
 }
 
 hook() {
@@ -374,10 +362,6 @@ push_one() {
 	ret=$?
 	echo
 	return $ret
-}
-
-retire() {
-	unset VCSH_DIRECTORY
 }
 
 rename() {
@@ -549,41 +533,12 @@ write_gitignore() {
 	return 0
 }
 
-normalize_cmd() {
-	case $1 in
-		clone|clon|clo|cl) echo clone;;
-		commit|commi|comm|com|co) echo commit;;
-		delete|delet|dele|del|de) echo delete;;
-		enter|ente|ent|en) echo enter;;
-		help|hel|he|'') echo help;;
-		init|ini|in) echo init;;
-		pull|pul) echo pull;;
-		push|pus) echo push;;
-		rename|renam|rena|ren|re) echo rename;;
-		run|ru) echo run;;
-		status|statu|stat|sta|st) echo status;;
-		upgrade|upgrad|upgra|upgr|up) echo upgrade;;
-		version|versio|versi|vers|ver|ve) echo version;;
-		which|whic|whi|wh) echo which;;
-		write-gitignore|write|writ|wri|wr) echo write-gitignore;;
-		# Unabbreviated commands
-		foreach|list|list-tracked|list-untracked|list-tracked-by)
-			echo "$1";;
-	esac
-}
-
 check_dir() {
 	[ -d "$1" ] && return
 	[ -e "$1" ] && fatal "'$1' exists but is not a directory" 13
 
 	verbose "attempting to create '$1'"
 	mkdir -p "$1" || fatal "could not create '$1'" 50
-}
-
-check_needed_dirs() {
-	check_dir "$VCSH_REPO_D"
-	[ ! "x$VCSH_GITIGNORE" = 'xnone' ] && check_dir "$VCSH_BASE/.gitignore.d"
-	[ ! "x$VCSH_GITATTRIBUTES" = 'xnone' ] && check_dir "$VCSH_BASE/.gitattributes.d"
 }
 
 enter_repo() {
@@ -600,51 +555,8 @@ enter_repo() {
 
 use_repo() {
 	enter_repo "$1"
-	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
+	[ -d "$GIT_DIR" ] || fatal "no repository found for '$VCSH_REPO_NAME'" 12
 	VCSH_DIRECTORY=$VCSH_REPO_NAME; export VCSH_DIRECTORY
-}
-
-source_configs() {
-	# Read configuration files if there are any
-	[ -r "/etc/vcsh/config" ]             && . "/etc/vcsh/config"
-	[ -r "$XDG_CONFIG_HOME/vcsh/config" ] && . "$XDG_CONFIG_HOME/vcsh/config"
-	if [ -n "$VCSH_OPTION_CONFIG" ]; then
-		# Source $VCSH_OPTION_CONFIG if it can be read and is in $PWD of $PATH
-		if [ -r "$VCSH_OPTION_CONFIG" ]; then
-			source_all "$VCSH_OPTION_CONFIG"
-		else
-			fatal "Can not read configuration file '$VCSH_OPTION_CONFIG'" 1
-		fi
-	fi
-}
-
-set_defaults() {
-	# Read defaults
-	: ${VCSH_REPO_D:="$XDG_CONFIG_HOME/vcsh/repo.d"}
-	: ${VCSH_HOOK_D:="$XDG_CONFIG_HOME/vcsh/hooks-enabled"}
-	: ${VCSH_OVERLAY_D:="$XDG_CONFIG_HOME/vcsh/overlays-enabled"}
-	: ${VCSH_BASE:="$HOME"}
-	: ${VCSH_GITIGNORE:=exact}
-	: ${VCSH_GITATTRIBUTES:=none}
-	: ${VCSH_WORKTREE:=absolute}
-}
-
-validate_env_options() {
-	if [ ! "x$VCSH_GITIGNORE" = 'xexact' ] && [ ! "x$VCSH_GITIGNORE" = 'xnone' ] && [ ! "x$VCSH_GITIGNORE" = 'xrecursive' ]; then
-		fatal "'\$VCSH_GITIGNORE' must equal 'exact', 'none', or 'recursive'" 1
-	fi
-
-	if [ ! "x$VCSH_WORKTREE" = 'xabsolute' ] && [ ! "x$VCSH_WORKTREE" = 'xrelative' ]; then
-		fatal "'\$VCSH_WORKTREE' must equal 'absolute', or 'relative'" 1
-	fi
-}
-
-source_cmd_configs() {
-	for overlay in "$VCSH_OVERLAY_D/$1"*; do
-		[ -r "$overlay" ] || continue
-		info "sourcing '$overlay'"
-		. "$overlay"
-	done
 }
 
 source_extra_configs() {
@@ -657,19 +569,6 @@ source_extra_configs() {
 		info "sourcing '$overlay'"
 		. "$overlay"
 	done
-}
-
-run_vcsh_cmd() {
-	VCSH_COMMAND=$(echo "$1" | sed 's/-/_/g'); export VCSH_COMMAND
-	shift
-	source_cmd_configs "$VCSH_COMMAND"
-	verbose "$VCSH_COMMAND begin"
-	hook pre-command
-	"$VCSH_COMMAND" "$@"
-	VCSH_COMMAND_RETURN_CODE=$?
-	hook post-command
-	verbose "$VCSH_COMMAND end, exiting"
-	return $VCSH_COMMAND_RETURN_CODE
 }
 
 # If '.git-HEAD' is appended to the version, you are seeing an unreleased
@@ -697,44 +596,112 @@ while getopts "c:dv" flag; do
 	shift 1
 done
 
-# Read configuration and set defaults if anything's not set
+# Configuration directory
 : ${XDG_CONFIG_HOME:="$HOME/.config"}
-source_configs
+
+# Read configuration files if there are any
+[ -r "/etc/vcsh/config" ]             && . "/etc/vcsh/config"
+[ -r "$XDG_CONFIG_HOME/vcsh/config" ] && . "$XDG_CONFIG_HOME/vcsh/config"
+if [ -n "$VCSH_OPTION_CONFIG" ]; then
+	# Source $VCSH_OPTION_CONFIG if it can be read and is in $PWD or $PATH
+	if [ -r "$VCSH_OPTION_CONFIG" ]; then
+		case "$VCSH_OPTION_CONFIG" in
+			*/*) . "$VCSH_OPTION_CONFIG";;
+			*)   . "$PWD/$VCSH_OPTION_CONFIG";;
+		esac;
+	else
+		fatal "Can not read configuration file '$VCSH_OPTION_CONFIG'" 1
+	fi
+fi
 [ -n "$VCSH_DEBUG" ]                  && set -vx
 
-set_defaults
-validate_env_options
+# Set configuration defaults for anything still unset
+: ${VCSH_REPO_D:="$XDG_CONFIG_HOME/vcsh/repo.d"}
+: ${VCSH_HOOK_D:="$XDG_CONFIG_HOME/vcsh/hooks-enabled"}
+: ${VCSH_OVERLAY_D:="$XDG_CONFIG_HOME/vcsh/overlays-enabled"}
+: ${VCSH_BASE:="$HOME"}
+: ${VCSH_GITIGNORE:=exact}
+: ${VCSH_GITATTRIBUTES:=none}
+: ${VCSH_WORKTREE:=absolute}
+
+# Validate configuration options
+if [ ! "x$VCSH_GITIGNORE" = 'xexact' ] && [ ! "x$VCSH_GITIGNORE" = 'xnone' ] && [ ! "x$VCSH_GITIGNORE" = 'xrecursive' ]; then
+	fatal "'\$VCSH_GITIGNORE' must equal 'exact', 'none', or 'recursive'" 1
+fi
+
+if [ ! "x$VCSH_WORKTREE" = 'xabsolute' ] && [ ! "x$VCSH_WORKTREE" = 'xrelative' ]; then
+	fatal "'\$VCSH_WORKTREE' must equal 'absolute', or 'relative'" 1
+fi
 
 debug $(git version)
 
-cmd=$(normalize_cmd "$1")
+case $1 in
+	clone|clon|clo|cl) VCSH_COMMAND=clone;;
+	commit|commi|comm|com|co) VCSH_COMMAND=commit;;
+	delete|delet|dele|del|de) VCSH_COMMAND=delete;;
+	enter|ente|ent|en) VCSH_COMMAND=enter;;
+	help|hel|he|'') VCSH_COMMAND=help;;
+	init|ini|in) VCSH_COMMAND=init;;
+	pull|pul) VCSH_COMMAND=pull;;
+	push|pus) VCSH_COMMAND=push;;
+	rename|renam|rena|ren|re) VCSH_COMMAND=rename;;
+	run|ru) VCSH_COMMAND=run;;
+	status|statu|stat|sta|st) VCSH_COMMAND=status;;
+	upgrade|upgrad|upgra|upgr|up) VCSH_COMMAND=upgrade;;
+	version|versio|versi|vers|ver|ve) VCSH_COMMAND=version;;
+	which|whic|whi|wh) VCSH_COMMAND=which;;
+	write-gitignore|write|writ|wri|wr) VCSH_COMMAND=write-gitignore;;
 
-# Unrecognized command = implicit enter or run
-if [ -z "$cmd" ]; then
-	if [ $# -lt 2 ]; then
-		cmd=enter
-		set -- enter "$@"
-	else
-		cmd=run
-		repo=$1
-		shift 1
-		set -- run "$repo" git "$@"
-	fi
-fi
+	# Unabbreviated commands
+	foreach|list|list-tracked|list-untracked|list-tracked-by) VCSH_COMMAND=$1;;
 
-# Command now stored in $cmd
+	# Unrecognized command = implicit enter or run
+	*)
+		if [ $# -lt 2 ]; then
+			VCSH_COMMAND=enter
+			set -- enter "$@"
+		else
+			VCSH_COMMAND=run
+			repo=$1
+			shift 1
+			set -- run "$repo" git "$@"
+		fi
+		;;
+esac
+
+# Command now stored in $VCSH_COMMAND
 shift 1
 
 # First handle commands which exit immediately
-if [ x"$cmd" = x'version' ]; then
+if [ x"$VCSH_COMMAND" = x'version' ]; then
 	echo "$SELF $VERSION"
 	git version
 	exit
 fi
-if [ x"$cmd" = x'help' ]; then
+if [ x"$VCSH_COMMAND" = x'help' ]; then
 	# $1 is empty, or 'help'
 	help && exit
 fi
 
-check_needed_dirs
-run_vcsh_cmd "$cmd" "$@"
+# Check for and create needed directories
+check_dir "$VCSH_REPO_D"
+[ ! "x$VCSH_GITIGNORE" = 'xnone' ] && check_dir "$VCSH_BASE/.gitignore.d"
+[ ! "x$VCSH_GITATTRIBUTES" = 'xnone' ] && check_dir "$VCSH_BASE/.gitattributes.d"
+
+VCSH_COMMAND=$(echo "$VCSH_COMMAND" | sed 's/-/_/g'); export VCSH_COMMAND
+
+# Source overlays for this command
+for overlay in "$VCSH_OVERLAY_D/$VCSH_COMMAND"*; do
+	[ -r "$overlay" ] || continue
+	info "sourcing '$overlay'"
+	. "$overlay"
+done
+
+verbose "$VCSH_COMMAND begin"
+hook pre-command
+"$VCSH_COMMAND" "$@"
+VCSH_COMMAND_RETURN_CODE=$?
+hook post-command
+verbose "$VCSH_COMMAND end, exiting"
+
+exit $VCSH_COMMAND_RETURN_CODE
