@@ -697,7 +697,6 @@ while getopts "c:dv" flag; do
 	fi
 	shift 1
 done
-[ -n "$VCSH_DEBUG" ]                  && set -vx
 
 # Read configuration and set defaults if anything's not set
 : ${XDG_CONFIG_HOME:="$HOME/.config"}
