@@ -140,13 +140,13 @@ clone() {
 }
 
 for_each_repo() {
-	ret=0
+	fe_ret=0
 	for repo in "$VCSH_REPO_D"/*.git; do
 		[ -d "$repo" ] && [ -r "$repo" ] || continue
 		use_repo "$repo"
-		"$@" || ret=$?
+		"$@" || fe_ret=$?
 	done
-	return $ret
+	return $fe_ret
 }
 
 commit() {
@@ -190,8 +190,9 @@ enter() {
 	source_extra_configs "$VCSH_REPO_NAME" enter
 	repo_hook "$VCSH_REPO_NAME" pre-enter
 	$SHELL
+	ret=$?
 	repo_hook "$VCSH_REPO_NAME" post-enter
-	return 0
+	return $ret
 }
 
 foreach() {

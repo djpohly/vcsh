@@ -5,7 +5,7 @@ test_description='Push command'
 . ./test-lib.sh
 . "$TEST_DIRECTORY/environment.bash"
 
-test_expect_failure 'push fails if first push fails' \
+test_expect_success 'push fails if first push fails' \
 	'git clone --bare -b "$TESTBR1" "$TESTREPO" upstream1.git &&
 	git clone --bare -b "$TESTBR2" "$TESTREPO" upstream2.git &&
 
