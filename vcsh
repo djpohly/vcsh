@@ -603,15 +603,12 @@ done
 [ -r "/etc/vcsh/config" ]             && . "/etc/vcsh/config"
 [ -r "$XDG_CONFIG_HOME/vcsh/config" ] && . "$XDG_CONFIG_HOME/vcsh/config"
 if [ -n "$VCSH_OPTION_CONFIG" ]; then
-	# Source $VCSH_OPTION_CONFIG if it can be read and is in $PWD or $PATH
-	if [ -r "$VCSH_OPTION_CONFIG" ]; then
-		case "$VCSH_OPTION_CONFIG" in
-			*/*) . "$VCSH_OPTION_CONFIG";;
-			*)   . "$PWD/$VCSH_OPTION_CONFIG";;
-		esac;
-	else
-		fatal "Can not read configuration file '$VCSH_OPTION_CONFIG'" 1
-	fi
+	# Source $VCSH_OPTION_CONFIG if it can be read, but don't search $PATH
+	[ -r "$VCSH_OPTION_CONFIG" ] || fatal "Can not read configuration file '$VCSH_OPTION_CONFIG'" 1
+	case "$VCSH_OPTION_CONFIG" in
+		*/*) . "$VCSH_OPTION_CONFIG";;
+		*)   . "$PWD/$VCSH_OPTION_CONFIG";;
+	esac;
 fi
 [ -n "$VCSH_DEBUG" ]                  && set -vx
 
