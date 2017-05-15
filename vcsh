@@ -21,6 +21,22 @@ fatal() {
 	exit $2
 }
 
+error() {
+	echo "$SELF: error: $1" >&2
+}
+
+info() {
+	echo "$SELF: info: $1"
+}
+
+verbose() {
+	if [ -n "$VCSH_DEBUG" ] || [ -n "$VCSH_VERBOSE" ]; then echo "$SELF: verbose: $@"; fi
+}
+
+debug() {
+	[ -n "$VCSH_DEBUG" ] && echo "$SELF: debug: $@"
+}
+
 help() {
 	echo "usage: $SELF <options> <command>
 
@@ -62,22 +78,6 @@ help() {
 
    <repo> <git command> Shortcut to run git commands directly
    <repo>               Shortcut to enter repository" >&2
-}
-
-debug() {
-	[ -n "$VCSH_DEBUG" ] && echo "$SELF: debug: $@"
-}
-
-verbose() {
-	if [ -n "$VCSH_DEBUG" ] || [ -n "$VCSH_VERBOSE" ]; then echo "$SELF: verbose: $@"; fi
-}
-
-error() {
-	echo "$SELF: error: $1" >&2
-}
-
-info() {
-	echo "$SELF: info: $1"
 }
 
 clone() {
