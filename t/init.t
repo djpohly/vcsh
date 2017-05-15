@@ -17,7 +17,7 @@ test_expect_success 'Init command can be abbreviated (ini, in)' \
 	test_must_fail $VCSH ini foo &&
 	test_must_fail $VCSH in foo'
 
-test_expect_failure 'Init command takes exactly one parameter' \
+test_expect_success 'Init command takes exactly one parameter' \
 	'test_must_fail $VCSH init &&
 	test_must_fail $VCSH init one two &&
 	test_must_fail $VCSH init a b c'

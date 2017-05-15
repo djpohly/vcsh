@@ -236,6 +236,7 @@ repo_hook() {
 
 init() {
 	[ $# -lt 1 ] && fatal "init: please specify repository to work on" 1
+	[ $# -ge 2 ] && fatal "init: too many parameters" 1
 	enter_repo "$1"
 	source_extra_configs "$VCSH_REPO_NAME" init
 	# XXX Should this really be repo_hook if the repo doesn't exist yet?
