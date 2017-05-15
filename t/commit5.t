@@ -5,7 +5,7 @@ test_description='Commit command'
 . ./test-lib.sh
 . "$TEST_DIRECTORY/environment.bash"
 
-test_expect_success 'commit not affected by existing \$VCSH_COMMAND_RETURN_CODE' \
+test_expect_success 'commit not affected by existing $VCSH_COMMAND_RETURN_CODE' \
 	'VCSH_COMMAND_RETURN_CODE=1 &&
 	export VCSH_COMMAND_RETURN_CODE &&
 	$VCSH commit'
