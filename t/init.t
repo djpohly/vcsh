@@ -1,146 +1,82 @@
-#!/usr/bin/env bats
+#!/bin/bash
 
-load environment
+test_description='Init command'
 
-@test "Init command succeeds" {
-	$VCSH init foo
-}
+. ./test-lib.sh
+. "$TEST_DIRECTORY/environment.bash"
 
-@test "Init command takes exactly one parameter" {
-	skip "BUG"
+test_expect_success 'Init command succeeds' \
+	'$VCSH init foo'
 
-	! $VCSH init || false
-	! $VCSH init foo bar || false
-	$VCSH init baz
-}
+test_expect_success 'Init command fails if repository already exists' \
+	'test_must_fail $VCSH init foo'
 
-@test "Init command fails if repository already exists" {
-	$VCSH init exists
-	! $VCSH init exists || false
-}
+test_expect_success 'Init command can be abbreviated (ini, in)' \
+	'$VCSH ini bar &&
+	$VCSH in baz &&
+	test_must_fail $VCSH ini foo &&
+	test_must_fail $VCSH in foo'
 
-@test "Init creates repositories with same toplevel" {
-	$VCSH init foo
-	$VCSH init bar
+test_expect_failure 'Init command takes exactly one parameter' \
+	'test_must_fail $VCSH init &&
+	test_must_fail $VCSH init one two &&
+	test_must_fail $VCSH init a b c'
 
-	run $VCSH run foo git rev-parse --show-toplevel
-	toplevel="$output"
+test_expect_success 'Init creates repositories with same toplevel' \
+	'$VCSH run foo git rev-parse --show-toplevel >output1 &&
+	$VCSH run bar git rev-parse --show-toplevel >output2 &&
+	test_cmp output1 output2'
 
-	run $VCSH run bar git rev-parse --show-toplevel
-	assert "$output" = "$toplevel"
-}
+test_expect_success 'Init command respects alternate $VCSH_REPO_D' \
+	'mkdir -p repod1 repod2 &&
+	test_env VCSH_REPO_D="$PWD/repod1" $VCSH init alt-repo &&
+	test_env VCSH_REPO_D="$PWD/repod2" $VCSH init alt-repo'
 
-@test "Init command respects alternate \$VCSH_REPO_D" {
-	VCSH_REPO_D="$PWD/foo" $VCSH init samename
-	VCSH_REPO_D="$PWD/bar" $VCSH init samename
-}
+test_expect_success 'Init command respects alternate $XDG_CONFIG_HOME' \
+	'mkdir -p xdg1 xdg2 &&
+	test_env XDG_CONFIG_HOME="$PWD/xdg1" $VCSH init alt-xdg &&
+	test_env XDG_CONFIG_HOME="$PWD/xdg2" $VCSH init alt-xdg'
 
-@test "Init command respects alternate \$XDG_CONFIG_HOME" {
-	XDG_CONFIG_HOME="$PWD/foo" $VCSH init samename
-	XDG_CONFIG_HOME="$PWD/bar" $VCSH init samename
-}
+test_expect_success 'Init command respects alternate $HOME' \
+	'mkdir -p home1 home2 &&
+	test_env HOME="$PWD/home1" $VCSH init alt-home &&
+	test_env HOME="$PWD/home2" $VCSH init alt-home'
 
-@test "Init command respects alternate \$HOME" {
-	HOME="$PWD/foo" $VCSH init samename
-	HOME="$PWD/bar" $VCSH init samename
-}
+test_expect_success 'Init command fails if directories cannot be created' \
+	'mkdir ro &&
+	chmod a-w ro &&
+	test_env HOME="$PWD/ro" test_must_fail $VCSH init foo'
 
-@test "Init command fails if directories cannot be created" {
-	mkdir ro
-	chmod a-w ro
-	! HOME="$PWD/ro" $VCSH init foo || false
-}
+test_expect_success '$VCSH_REPO_D overrides $XDG_CONFIG_HOME and $HOME for init' \
+	'mkdir -p foo4 bar4 foo4a bar4a over4a over4b &&
+	test_env HOME="$PWD/foo4" XDG_CONFIG_HOME="$PWD/bar4" VCSH_REPO_D="$PWD/over4a" $VCSH init samename &&
+	test_env HOME="$PWD/foo4a" XDG_CONFIG_HOME="$PWD/bar4" VCSH_REPO_D="$PWD/over4a" test_must_fail $VCSH init samename &&
+	test_env HOME="$PWD/foo4" XDG_CONFIG_HOME="$PWD/bar4a" VCSH_REPO_D="$PWD/over4a" test_must_fail $VCSH init samename &&
+	test_env HOME="$PWD/foo4a" XDG_CONFIG_HOME="$PWD/bar4a" VCSH_REPO_D="$PWD/over4a" test_must_fail $VCSH init samename &&
+	test_env HOME="$PWD/foo4" XDG_CONFIG_HOME="$PWD/bar4" VCSH_REPO_D="$PWD/over4b" $VCSH init samename &&
+	test_env HOME="$PWD/foo4a" XDG_CONFIG_HOME="$PWD/bar4" VCSH_REPO_D="$PWD/over4b" test_must_fail $VCSH init samename &&
+	test_env HOME="$PWD/foo4" XDG_CONFIG_HOME="$PWD/bar4a" VCSH_REPO_D="$PWD/over4b" test_must_fail $VCSH init samename &&
+	test_env HOME="$PWD/foo4a" XDG_CONFIG_HOME="$PWD/bar4a" VCSH_REPO_D="$PWD/over4b" test_must_fail $VCSH init samename'
 
-@test "Init command can be abbreviated 'ini'/'in'" {
-	$VCSH ini test1
-	$VCSH in test2
+test_expect_success '$XDG_CONFIG_HOME overrides $HOME for init' \
+	'mkdir -p foo5 bar5 over5a over5b &&
+	test_env HOME="$PWD/foo5" XDG_CONFIG_HOME="$PWD/over5a" $VCSH init samename &&
+	test_env HOME="$PWD/bar5" XDG_CONFIG_HOME="$PWD/over5a" test_must_fail $VCSH init samename &&
+	test_env HOME="$PWD/foo5" XDG_CONFIG_HOME="$PWD/over5b" $VCSH init samename &&
+	test_env HOME="$PWD/bar5" XDG_CONFIG_HOME="$PWD/over5b" test_must_fail $VCSH init samename'
 
-	run $VCSH list
-	assert "$status" -eq 0
-	assert "$output" = $'test1\ntest2'
-}
+# Too internal to implementation?  If another command verifies
+# vcsh.vcsh, use that instead of git config.
+test_expect_success 'Init command marks repository with vcsh.vcsh=true' \
+	'echo true >expected &&
+	$VCSH run foo git config vcsh.vcsh >output &&
+	test_cmp expected output'
 
-@test "\$VCSH_REPO_D overrides \$XDG_CONFIG_HOME and \$HOME for init" {
-	HOME="$PWD/foo" $VCSH init samename1
-	XDG_CONFIG_HOME="$PWD/bar" $VCSH init samename2
+test_expect_success 'Init command adds matching gitignore.d files' \
+	'mkdir -p .gitattributes.d .gitignore.d &&
+	touch .gitattributes.d/test1 .gitignore.d/test1 &&
 
-	HOME="$PWD/foo" XDG_CONFIG_HOME="$PWD/bar" VCSH_REPO_D="$PWD/baz" $VCSH init samename1
-	HOME="$PWD/foo" XDG_CONFIG_HOME="$PWD/bar" VCSH_REPO_D="$PWD/baz" $VCSH init samename2
-}
+	test_env VCSH_GITIGNORE=exact $VCSH init test1 &&
+	$VCSH status test1 | assert_grep -Fx "A  .gitignore.d/test1"'
 
-@test "\$XDG_CONFIG_HOME overrides \$HOME for init" {
-	HOME="$PWD/foo" $VCSH init samename
-	HOME="$PWD/foo" XDG_CONFIG_HOME="$PWD/bar" $VCSH init samename
-}
-
-@test "Init command marks repository with vcsh.vcsh=true" {
-	# Too internal to implementation?  If another command verifies
-	# vcsh.vcsh, use that instead of git config.
-
-	$VCSH init test1
-
-	run $VCSH run test1 git config vcsh.vcsh
-	assert "$status" -eq 0
-	assert "$output" = "true"
-}
-
-@test "Files created by init are not readable by other users" {
-	# verifies commit e220a61
-	$VCSH init foo
-	run find "$PWD" -type f -perm /g+rwx,o+rwx
-	assert "$output" = ''
-}
-
-@test "Init command adds matching gitignore.d files" {
-	mkdir -p .gitattributes.d .gitignore.d
-	touch .gitattributes.d/test1 .gitignore.d/test1
-
-	VCSH_GITIGNORE=exact $VCSH init test1
-	$VCSH status test1 | assert_grep -Fx 'A  .gitignore.d/test1'
-}
-
-@test "Init command creates new Git repository" {
-	run num_gitrepos "$PWD"
-	assert "$output" = '0'
-
-	for i in $(seq 5); do
-		$VCSH init "test$i"
-		run num_gitrepos "$PWD"
-		assert "$output" = "$i"
-	done
-}
-
-@test "VCSH_GITIGNORE variable is validated" {
-	! VCSH_GITIGNORE=x $VCSH init foo || false
-	! VCSH_GITIGNORE=nonsense $VCSH init foo || false
-	! VCSH_GITIGNORE=fhqwhgads $VCSH init foo || false
-}
-
-@test "Init command sets core.excludesfile with VCSH_GITIGNORE=exact" {
-	# XXX test instead by making sure files are actually excluded, not by
-	# reading config option
-	VCSH_GITIGNORE=exact $VCSH init test1
-	$VCSH run test1 git config core.excludesfile
-}
-
-@test "Init command sets core.excludesfile with VCSH_GITIGNORE=recursive" {
-	# XXX test instead by making sure files are actually excluded, not by
-	# reading config option
-	VCSH_GITIGNORE=recursive $VCSH init test1
-	$VCSH run test1 git config core.excludesfile
-}
-
-@test "Init command does not set core.excludesfile with VCSH_GITIGNORE=none" {
-	VCSH_GITIGNORE=none $VCSH init test1
-	! $VCSH run test1 git config core.excludesfile || false
-}
-
-@test "Init command sets core.attributesfile with VCSH_GITATTRIBUTES!=none" {
-	VCSH_GITATTRIBUTES=whatever $VCSH init test1
-	$VCSH run test1 git config core.attributesfile
-}
-
-@test "Init command does not set core.attributesfile with VCSH_GITATTRIBUTES=none" {
-	VCSH_GITATTRIBUTES=none $VCSH init test1
-	! $VCSH run test1 git config core.attributesfile || false
-}
+test_done

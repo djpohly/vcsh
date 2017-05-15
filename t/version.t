@@ -1,24 +1,24 @@
-#!/usr/bin/env bats
+#!/bin/bash
 
-load environment
+test_description='Version command'
 
-@test "Version command succeeds" {
-	$VCSH version
-}
+. ./test-lib.sh
+. "$TEST_DIRECTORY/environment.bash"
 
-@test "Version command prints vcsh and git versions" {
-	run $VCSH version
-	echo "${lines[0]}" | assert_grep '^vcsh [0-9]'
-	echo "${lines[1]}" | assert_grep '^git version [0-9]'
-}
+test_expect_success 'Version command succeeds' \
+	'$VCSH version'
 
-@test "Version can be abbreviated (versio, versi, vers, ver, ve)" {
-	run $VCSH version
-	expected=$output
+test_expect_success 'Version command prints vcsh and git versions' \
+	'$VCSH version >output &&
+	sed -n 1p output | assert_grep "^vcsh [0-9]" &&
+	sed -n 2p output | assert_grep "^git version [0-9]"'
+
+test_expect_success 'Version can be abbreviated (versio, versi, vers, ver, ve)' \
+	'$VCSH version >expected &&
 
 	for cmd in versio versi vers ver ve; do
-		run $VCSH $cmd
-		assert "$status" -eq 0
-		assert "$output" = "$expected"
-	done
-}
+		$VCSH $cmd >output &&
+		test_cmp expected output
+	done'
+
+test_done

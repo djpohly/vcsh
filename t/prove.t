@@ -1,19 +1,28 @@
-#!/usr/bin/env bats
+#!/bin/bash
 
-load environment
+test_description='Old tests'
 
-@test "300-add.t" {
-	$VCSH init test1
-	$VCSH init test2
+. ./test-lib.sh
+. "$TEST_DIRECTORY/environment.bash"
 
-	touch 'a'
-	$VCSH test2 add 'a'
+test_expect_success '300-add.t' \
+	'$VCSH init test1 &&
+	$VCSH init test2 &&
 
-	run $VCSH status
-	assert "$status" -eq 0
-	assert "$output" = $'test1:\n\ntest2:\nA  a'
+	touch a &&
+	$VCSH test2 add a &&
 
-	run $VCSH status --terse
-	assert "$status" -eq 0
-	assert "$output" = $'test2:\nA  a'
-}
+	echo "test1:"  >expected &&
+	echo ""       >>expected &&
+	echo "test2:" >>expected &&
+	echo "A  a"   >>expected &&
+	echo ""       >>expected &&
+	$VCSH status >output &&
+	test_cmp expected output &&
+
+	echo "test2:"  >expected &&
+	echo "A  a"   >>expected &&
+	$VCSH status --terse >output &&
+	test_cmp expected output'
+
+test_done
