@@ -387,7 +387,6 @@ rename() {
 	source_extra_configs "$VCSH_REPO_NAME" rename
 	VCSH_REPO_NAME_NEW=$2; export VCSH_REPO_NAME_NEW;
 	GIT_DIR_NEW=$VCSH_REPO_D/$VCSH_REPO_NAME_NEW.git; export GIT_DIR_NEW
-	git_dir_exists "$GIT_DIR" "$VCSH_REPO_NAME"
 	[ -d "$GIT_DIR_NEW" ] && fatal "'$GIT_DIR_NEW' exists" 54
 	mv -f "$GIT_DIR" "$GIT_DIR_NEW" || fatal "Could not mv '$GIT_DIR' '$GIT_DIR_NEW'" 52
 
