@@ -5,8 +5,7 @@ test_description='Commit command'
 . ./test-lib.sh
 . "$TEST_DIRECTORY/environment.bash"
 
-# Commit is broken
-test_expect_failure 'commit works even if not all repos have changes' \
+test_expect_success 'commit works even if not all repos have changes' \
 	'$VCSH init foo &&
 	$VCSH init bar &&
 

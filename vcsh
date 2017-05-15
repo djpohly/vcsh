@@ -159,10 +159,9 @@ commit() {
 
 commit_one() {
 	echo "$VCSH_REPO_NAME: "
+	# Ignore return value - git-commit fails if nothing to commit
 	git commit --untracked-files=no --quiet "$@"
-	ret=$?
 	echo
-	return $ret
 }
 
 delete() {
