@@ -12,8 +12,7 @@ test_expect_success 'list-untracked works with no repos' \
 	'$VCSH list-untracked &>output &&
 	test_must_be_empty output'
 
-# Bug
-test_expect_failure 'list-untracked argument must be a repo' \
+test_expect_success 'list-untracked argument must be a repo' \
 	'test_must_fail $VCSH list-untracked nope'
 
 test_setup 'Create directory to isolate files' \
