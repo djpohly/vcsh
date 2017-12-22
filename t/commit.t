@@ -3,7 +3,7 @@
 test_description='Commit command'
 
 . ./test-lib.sh
-. "$TEST_DIRECTORY/environment.bash"
+. "$TEST_DIRECTORY/environment.sh"
 
 test_expect_success 'commit works with no repos' \
 	'$VCSH commit >output &&
@@ -38,8 +38,8 @@ test_expect_success 'commit works with multiple repos' \
 	$VCSH commit -m "multiple" >output &&
 	test_cmp expected output &&
 
-	$VCSH foo log --oneline | assert_grep -x "....... multiple" &&
-	$VCSH bar log --oneline | assert_grep -x "....... multiple"'
+	$VCSH foo log --oneline | test_grep -x "....... multiple" &&
+	$VCSH bar log --oneline | test_grep -x "....... multiple"'
 
 test_expect_success 'commit can handle arguments with spaces' \
 	'touch msg1 msg2 &&
@@ -47,8 +47,8 @@ test_expect_success 'commit can handle arguments with spaces' \
 	$VCSH bar add msg2 &&
 	$VCSH commit -m "log message" &&
 
-	$VCSH foo log --oneline | assert_grep -x "....... log message" &&
-	$VCSH bar log --oneline | assert_grep -x "....... log message"'
+	$VCSH foo log --oneline | test_grep -x "....... log message" &&
+	$VCSH bar log --oneline | test_grep -x "....... log message"'
 
 test_expect_success 'commit works even if not all repos have changes' \
 	'touch part1 part2 &&
@@ -58,8 +58,8 @@ test_expect_success 'commit works even if not all repos have changes' \
 	$VCSH bar add part2 &&
 	$VCSH commit -m "part2" &&
 
-	$VCSH foo log --oneline | assert_grep -x "....... part1" &&
-	$VCSH bar log --oneline | assert_grep -x "....... part2"'
+	$VCSH foo log --oneline | test_grep -x "....... part1" &&
+	$VCSH bar log --oneline | test_grep -x "....... part2"'
 
 test_expect_success 'commit not affected by existing $VCSH_COMMAND_RETURN_CODE' \
 	'VCSH_COMMAND_RETURN_CODE=1 &&

@@ -3,7 +3,7 @@
 test_description='Delete command'
 
 . ./test-lib.sh
-. "$TEST_DIRECTORY/environment.bash"
+. "$TEST_DIRECTORY/environment.sh"
 
 test_expect_success 'Delete requires repo name' \
 	'test_must_fail $VCSH delete'
@@ -58,26 +58,23 @@ test_expect_success 'Deleted repository cannot be subsequently used' \
 	test_must_fail $VCSH run foo echo fail'
 
 test_expect_success 'Delete lists staged files before confirmation' \
-	'$VCSH init foo &&
-	test_when_finished "doit | $VCSH delete foo" &&
+	'vcsh_temp_repo foo &&
 	touch randomtexttofind &&
 	$VCSH foo add randomtexttofind &&
 
 	: | test_must_fail $VCSH delete foo >output &&
-	assert_grep -F randomtexttofind <output'
+	test_grep -F randomtexttofind <output'
 
 # Do we actually want this?
 test_expect_failure 'Delete lists files staged for removal before confirmation' \
-	'$VCSH init foo &&
-	test_when_finished "doit | $VCSH delete foo" &&
-
+	'vcsh_temp_repo foo &&
 	touch randomtexttofind &&
 	$VCSH foo add randomtexttofind &&
 	$VCSH foo commit -m 'a' &&
 	$VCSH foo rm --cached randomtexttofind &&
 
 	: | test_must_fail $VCSH delete foo >output &&
-	assert_grep -F randomtexttofind <output'
+	test_grep -F randomtexttofind <output'
 
 test_expect_success 'Delete removes corresponding files' \
 	'$VCSH init foo &&
@@ -130,15 +127,15 @@ test_expect_success 'Delete can be abbreviated (delet, dele, del, de)' \
 	$VCSH init d &&
 
 	doit | $VCSH delet a &&
-	! $VCSH list | assert_grep -Fx a &&
+	! $VCSH list | test_grep -Fx a &&
 
 	doit | $VCSH dele b &&
-	! $VCSH list | assert_grep -Fx b &&
+	! $VCSH list | test_grep -Fx b &&
 
 	doit | $VCSH del c &&
-	! $VCSH list | assert_grep -Fx c &&
+	! $VCSH list | test_grep -Fx c &&
 
 	doit | $VCSH de d &&
-	! $VCSH list | assert_grep -Fx d'
+	! $VCSH list | test_grep -Fx d'
 
 test_done
