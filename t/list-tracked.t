@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 test_description='List-tracked command'
 
@@ -6,7 +6,7 @@ test_description='List-tracked command'
 . "$TEST_DIRECTORY/environment.sh"
 
 test_expect_success 'list-tracked works with no repos' \
-	'$VCSH list-tracked &>output &&
+	'$VCSH list-tracked >output 2>&1 &&
 	test_must_be_empty output'
 
 test_setup 'Create some files' \

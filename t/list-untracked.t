@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 test_description='List-untracked command'
 
@@ -9,7 +9,7 @@ test_setup 'Avoid creating additional untracked dirs/files' \
 	'export VCSH_GITIGNORE=none VCSH_GITATTRIBUTES=none'
 
 test_expect_success 'list-untracked works with no repos' \
-	'$VCSH list-untracked &>output &&
+	'$VCSH list-untracked >output 2>&1 &&
 	test_must_be_empty output'
 
 test_expect_success 'list-untracked argument must be a repo' \
@@ -24,8 +24,11 @@ test_expect_success 'list-untracked works with no files' \
 	test_must_be_empty output'
 
 test_setup 'Create some files/directories' \
-	'mkdir files/{tracked,part,untracked} &&
-	touch files/{a,b,tracked/{c,d},part/{e,f},untracked/{g,h}}'
+	'mkdir files/tracked files/part files/untracked &&
+	touch files/a files/b \
+		files/tracked/c files/tracked/d \
+		files/part/e files/part/f \
+		files/untracked/g files/untracked/h'
 
 # Bug?
 test_expect_failure 'list-untracked works with no repos' \
