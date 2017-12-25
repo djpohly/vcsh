@@ -5,7 +5,7 @@ before_script:
 script:
   - make test TEST_ARGS=--verbose-log
 after_failure:
-  - grep '' test-results/*.out
+  - make test-results
 notifications:
   email:
     on_success: change

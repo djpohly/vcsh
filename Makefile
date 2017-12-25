@@ -46,7 +46,10 @@ purge: uninstall
 	rmdir -p --ignore-fail-on-non-empty $(DESTDIR)$(ZSHDIR)
 
 test:
-	$(MAKE) -C t/
+	$(MAKE) -C t/ $@
+
+test-results:
+	$(MAKE) -C t/ $@
 
 moo:
 	@which cowsay >/dev/null 2>&1 && cowsay "I hope you're happy now..."
