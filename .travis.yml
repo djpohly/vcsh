@@ -1,11 +1,7 @@
 sudo: false
 language: bash
-before_script:
-  - echo '-j2' > "$HOME/.proverc"
 script:
-  - make test TEST_ARGS=--verbose-log
-after_failure:
-  - make test-results
+  - make test TEST_ARGS=--verbose
 notifications:
   email:
     on_success: change

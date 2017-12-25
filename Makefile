@@ -48,8 +48,5 @@ purge: uninstall
 test:
 	$(MAKE) -C t/ $@
 
-test-results:
-	$(MAKE) -C t/ $@
-
 moo:
 	@which cowsay >/dev/null 2>&1 && cowsay "I hope you're happy now..."
