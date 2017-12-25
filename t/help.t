@@ -25,8 +25,8 @@ test_expect_success 'Help command can be abbreviated (hel, he)' \
 	test_cmp expected output'
 
 test_expect_success 'Help printed when no command given' \
-	'verbose $VCSH help >expected 2>&1 &&
-	verbose $VCSH >output 2>&1 &&
+	'$VCSH help >expected 2>&1 &&
+	$VCSH >output 2>&1 &&
 	test_cmp expected output'
 
 # Help should explain each non-deprecated command.  (Note: adjust this if the
