@@ -637,12 +637,12 @@ fi
 
 debug $(git version)
 
-case $1 in
+case ${1:-help} in
 	clone|clon|clo|cl) VCSH_COMMAND=clone;;
 	commit|commi|comm|com|co) VCSH_COMMAND=commit;;
 	delete|delet|dele|del|de) VCSH_COMMAND=delete;;
 	enter|ente|ent|en) VCSH_COMMAND=enter;;
-	help|hel|he|'') VCSH_COMMAND=help;;
+	help|hel|he) VCSH_COMMAND=help;;
 	init|ini|in) VCSH_COMMAND=init;;
 	pull|pul) VCSH_COMMAND=pull;;
 	push|pus) VCSH_COMMAND=push;;
