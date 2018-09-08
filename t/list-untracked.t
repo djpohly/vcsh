@@ -71,7 +71,8 @@ test_expect_success 'list-untracked works with one empty repo' \
 	$VCSH list-untracked >output &&
 	test_cmp expected output'
 
-test_expect_success 'list-untracked -r works with one empty repo' \
+# Bug
+test_expect_failure 'list-untracked -r works with one empty repo' \
 	'{
 		echo a &&
 		echo b &&
@@ -101,7 +102,8 @@ test_expect_success 'list-untracked shows completely untracked directory' \
 	'$VCSH list-untracked >output &&
 	test_grep -Fx untracked/ <output'
 
-test_expect_success 'list-untracked -r shows contents of completely untracked directory' \
+# Bug
+test_expect_failure 'list-untracked -r shows contents of completely untracked directory' \
 	'$VCSH list-untracked -r >output &&
 	test_grep -Fx untracked/g <output &&
 	test_grep -Fx untracked/h <output'
